@@ -1,5 +1,9 @@
+# API KEY
+StreetviewScrapper/api_key.txt
+
 # MAPS
 MetadriveGame/maps/
+StreetviewScrapper/maps/
 
 # GPX FILES
 StreetviewScrapper/gpx_data/

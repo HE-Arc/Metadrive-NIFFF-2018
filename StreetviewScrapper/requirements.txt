@@ -3,5 +3,6 @@ chardet==3.0.4
 google-streetview==1.2.4
 idna==2.6
 kwconfig==1.1.7
+lxml==4.1.1
 requests==2.18.4
 urllib3==1.22
