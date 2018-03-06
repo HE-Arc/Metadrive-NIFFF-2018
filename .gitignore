@@ -1,5 +1,7 @@
-# GPX FILES
+# MAPS
+MetadriveGame/maps/
 
+# GPX FILES
 StreetviewScrapper/gpx_data/
 
 # Created by https://www.gitignore.io/api/virtualenv
