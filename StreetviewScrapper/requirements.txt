@@ -1,6 +1,5 @@
 certifi==2018.1.18
 chardet==3.0.4
-google-streetview==1.2.4
 idna==2.6
 kwconfig==1.1.7
 lxml==4.1.1
