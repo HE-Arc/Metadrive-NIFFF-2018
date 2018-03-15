@@ -1,7 +1,12 @@
-import sys, pygame
+import sys, pygame, time, math
 from pygame.locals import *
 
 from constants import *
+
+def map_range_to_range(min_a, max_a, min_b, max_b, value_a):
+    ratio = value_a / (max_a - min_a)
+    value_b = ratio * (max_b - min_b) + min_b
+    return value_b
 
 pygame.init()
 
@@ -29,6 +34,33 @@ index_view = 1
 btn_left_pressed = True
 btn_right_pressed = True
 
+
+images_count = 631
+
+# Time
+travel_time = 180
+last_time = time.time()
+total_time = 0
+delta_time = 1
+time_since_last_image = 0
+
+# Key Speed
+key_pressed_count = 0
+min_key_speed = 0
+max_key_speed = 6
+current_key_speed = min_key_speed # key per second
+
+# Image Speed
+average_image_speed = images_count / travel_time
+min_image_speed = 0
+max_image_speed = math.ceil(average_image_speed*2)
+current_image_speed = min_image_speed
+last_image_speed = min_image_speed
+image_speed_deceleration = 1
+
+print('Average image speed : ', average_image_speed)
+print('Max image speed : ', max_image_speed)
+
 while 1:
 
     # Clock tick : set the MAXIMUM FPS
@@ -44,12 +76,49 @@ while 1:
             if event.key == K_k and btn_right_pressed == True:
                 btn_left_pressed = True
                 btn_right_pressed = False
-                index_view += 1
+
+                key_pressed_count += 1
 
             if event.key == K_l and btn_left_pressed == True:
                 btn_left_pressed = False
                 btn_right_pressed = True
-                index_view += 1
+
+                key_pressed_count += 1
+
+    # Time Calc
+    current_time = time.time()
+    elapsed = current_time - last_time
+    last_time = current_time
+    total_time += elapsed
+    time_since_last_image += elapsed
+
+    # Switching images
+    if current_image_speed and time_since_last_image >= delta_time/current_image_speed: # ~ 16 ms
+        time_since_last_image = 0
+        index_view += 1
+
+    # Calculating speeds
+    if total_time > delta_time:
+        current_key_speed = key_pressed_count/total_time # is this really necessary ? ~ 16 ms
+        if current_key_speed > max_key_speed:
+            current_key_speed = max_key_speed
+
+        temp_image_speed = map_range_to_range(min_key_speed, max_key_speed, min_image_speed, max_image_speed, current_key_speed)
+
+        # Deceleration
+        if temp_image_speed < current_image_speed:
+            current_image_speed -= image_speed_deceleration
+            if current_image_speed < 0:
+                current_image_speed = 0
+        else:
+            current_image_speed = temp_image_speed
+
+        # Reset Loop
+        total_time = 0
+        key_pressed_count = 0
+        print('===== ', current_key_speed, ' =====')
+        print('##### ', current_image_speed, ' #####')
+
 
 
     screen.fill(black)
