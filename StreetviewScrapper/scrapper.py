@@ -1,5 +1,7 @@
 import os, urllib.request
 import argparse
+import cv2
+import numpy as np
 from lxml import etree
 
 
@@ -54,4 +56,15 @@ for index, location_node in enumerate(tree.xpath('//ns:trk/ns:trkseg/ns:trkpt', 
         parameters['heading'] = f'{children[0].text}'
 
     # Get the image at given url and save it into given folder
-    get_streetview_image(parameters, f'{args["output"]}/gsv_{index}.jpg')
+    get_streetview_image(parameters, f'{args["output"]}/output/gsv_{index}.jpg')
+
+    # Image enhancement with opencv ---------------------------
+    img = cv2.imread(f'{args["output"]}/output/gsv_{index}.jpg')
+    # Resize
+    res = cv2.resize(img,None,fx=3, fy=3, interpolation = cv2.INTER_CUBIC)
+    # Cropping
+    cropped = res[0:1920, 420:1500]
+    # Gaussian Blur
+    blur = cv2.GaussianBlur(cropped,(5,5),0)
+    # Save new image
+    cv2.imwrite( f'{args["output"]}/output_2/gsv_{index}.jpg', blur );
