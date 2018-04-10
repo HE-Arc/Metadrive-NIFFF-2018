@@ -10,7 +10,23 @@ def map_range_to_range(min_a, max_a, min_b, max_b, value_a):
     value_b = ratio * (max_b - min_b) + min_b
     return value_b
 
+def get_dancepad_output():
+    out = [0,0,0,0,0,0,0,0,0,0]
+
+    pygame.event.pump()
+
+    #Read input from buttons
+    for i in range(0, j.get_numbuttons()):
+        out[i] = j.get_button(i)
+    return out
+
 pygame.init()
+
+# Dance pad
+j = pygame.joystick.Joystick(0)
+j.init()
+print ('Initialized Joystick : ', j.get_name())
+
 
 # Events
 pygame.event.set_allowed([QUIT, KEYDOWN, KEYUP])
@@ -66,24 +82,38 @@ while 1:
     clock.tick(tick_rate)
 
     for event in pygame.event.get():
+        # Quit event
         if event.type == pygame.QUIT: sys.exit()
+        # Joystick Event
+        if event.type == JOYBUTTONDOWN or event.type == KEYDOWN:
 
-        if event.type == KEYDOWN:
-            if event.key == K_k and btn_right_pressed == True:
-                btn_left_pressed = True
-                btn_right_pressed = False
-                key_pressed_count += 1
-                # Mode one by one when key speed is not evaluated yet
-                if not current_image_speed:
-                    index_view += 1
+            # Get information about joystick buttons || Could have use event.button
+            dp_output = get_dancepad_output()
 
-            if event.key == K_l and btn_left_pressed == True:
-                btn_left_pressed = False
-                btn_right_pressed = True
-                key_pressed_count += 1
-                # Mode one by one when key speed is not evaluated yet
-                if not current_image_speed:
-                    index_view += 1
+            # Print button activation
+            if hasattr(event, 'button'):
+                print(dp_output)
+
+            # Left Button
+            if dp_output[0] or (hasattr(event, 'key') and event.key == K_k):
+                if btn_right_pressed:
+                    btn_left_pressed = True
+                    btn_right_pressed = False
+                    key_pressed_count += 1
+                    # Mode one by one when key speed is not evaluated yet
+                    if not current_image_speed:
+                        index_view += 1
+
+            # Right Button
+            if dp_output[3] or (hasattr(event, 'key') and event.key == K_l):
+                if btn_left_pressed:
+                    btn_left_pressed = False
+                    btn_right_pressed = True
+                    key_pressed_count += 1
+                    # Mode one by one when key speed is not evaluated yet
+                    if not current_image_speed:
+                        index_view += 1
+
     # Time Calc
     elapsed = clock.get_time()/1000
     total_time += elapsed
@@ -102,7 +132,7 @@ while 1:
             current_key_speed = max_key_speed
 
         temp_image_speed = map_range_to_range(min_key_speed, max_key_speed, min_image_speed, max_image_speed, current_key_speed)
-        
+
         # Deceleration
         if temp_image_speed < current_image_speed:
             current_image_speed -= image_speed_deceleration
