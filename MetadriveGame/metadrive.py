@@ -11,21 +11,25 @@ def map_range_to_range(min_a, max_a, min_b, max_b, value_a):
     return value_b
 
 def get_dancepad_output():
-    out = [0,0,0,0,0,0,0,0,0,0]
 
     pygame.event.pump()
 
-    #Read input from buttons
-    for i in range(0, j.get_numbuttons()):
-        out[i] = j.get_button(i)
-    return out
+    n = j.get_numbuttons()
+    #Read input from buttons and return a list with the state of all buttons
+    return [j.get_button(i) if i < n else 0 for i in range(max(10, n))]
 
 pygame.init()
 
-# Dance pad
-j = pygame.joystick.Joystick(0)
-j.init()
-print ('Initialized Joystick : ', j.get_name())
+# Dance pad Initialisation
+pygame.joystick.init()
+
+is_dancepad_connected = False
+
+if pygame.joystick.get_count() > 0:
+    j = pygame.joystick.Joystick(0)
+    j.init()
+    is_dancepad_connected = True
+    print ('Initialized Joystick : ', j.get_name())
 
 
 # Events
@@ -50,6 +54,8 @@ index_view = 1
 btn_left_pressed = True
 btn_right_pressed = True
 
+# Dancepad outputs (1 = enabled, 0 = disabled)
+dp_output = [0 for i in range(10)]
 
 images_count = 631
 
@@ -85,17 +91,18 @@ while 1:
         # Quit event
         if event.type == pygame.QUIT: sys.exit()
         # Joystick Event
-        if event.type == JOYBUTTONDOWN or event.type == KEYDOWN:
+        if event.type in (JOYBUTTONDOWN, KEYDOWN):
 
-            # Get information about joystick buttons || Could have use event.button
-            dp_output = get_dancepad_output()
+            if is_dancepad_connected:
+                # Get information about joystick buttons || Could have use event.button
+                dp_output = get_dancepad_output()
 
             # Print button activation
             if hasattr(event, 'button'):
                 print(dp_output)
 
             # Left Button
-            if dp_output[0] or (hasattr(event, 'key') and event.key == K_k):
+            if dp_output[0] or getattr(event, 'key', False) == K_k:
                 if btn_right_pressed:
                     btn_left_pressed = True
                     btn_right_pressed = False
@@ -105,7 +112,7 @@ while 1:
                         index_view += 1
 
             # Right Button
-            if dp_output[3] or (hasattr(event, 'key') and event.key == K_l):
+            if dp_output[3] or getattr(event, 'key', False) == K_l:
                 if btn_left_pressed:
                     btn_left_pressed = False
                     btn_right_pressed = True
