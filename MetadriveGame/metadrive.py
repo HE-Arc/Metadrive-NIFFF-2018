@@ -1,12 +1,8 @@
-import sys, pygame, time, math
+import sys, pygame, time, math, random
 
 from pygame.gfxdraw import *
-
 from pygame.locals import *
-
 from constants import *
-
-from pyaudio import PyAudio
 
 def map_range_to_range(min_a, max_a, min_b, max_b, value_a):
     ratio = value_a / (max_a - min_a)
@@ -24,6 +20,96 @@ def get_dancepad_output():
 def get_angle_dial(global_angle, current_val, max_val):
     return (1.5*math.pi-math.radians((360-global_angle)/2))-((current_val / max_val)*math.radians(global_angle))
 
+def draw_aa_filled_pie(surface, center_x, center_y, radius, angle_a, angle_b, color):
+    # Start list of polygon points
+    p = [(center_x, center_y)]
+
+    # Get points on arc
+    for angle in range(angle_a, angle_b):
+        x = center_x + int(radius * math.cos(math.radians(angle)))
+        y = center_y - int(radius * math.sin(math.radians(angle)))
+        p.append((x, y))
+
+    pygame.gfxdraw.aapolygon(surface, p, color)
+    pygame.gfxdraw.filled_polygon(surface, p, color)
+
+class Level:
+    """Class representing a level"""
+    id = 0
+    level_list = []
+
+    def __init__(self):
+        self.id = Level.id
+        Level.id += 1
+
+        self.new_clue_list = []
+        self.old_clue_list = []
+
+        Level.level_list.append(self)
+
+    def add_clue(self, clue):
+        self.new_clue_list.append(clue)
+
+    def get_random_clue(self):
+        random.shuffle(self.new_clue_list)
+        clue = None
+        # Check if list isnt empty
+        if self.new_clue_list:
+            clue = self.new_clue_list.pop()
+            self.old_clue_list.append(clue)
+        return clue
+
+    def reset(self):
+        self.new_clue_list = self.new_clue_list + self.old_clue_list
+        for clue in self.new_clue_list:
+            clue.reset()
+
+    def load_clues(self, filename):
+        pass
+
+class Clue:
+    """Class containing one set of subtitles for one level"""
+    def __init__(self):
+        self.subtitle_list = []
+        self.index = 0
+
+    def get_next_subtitle(self):
+
+        # If this isnt
+        if(len(self.subtitle_list) - 1 >= self.index):
+            subtitle = self.subtitle_list[self.index]
+            self.index += 1
+            return subtitle
+        else:
+            return None
+
+    def reset(self):
+        self.index = 0
+
+# INIT LEVEL AND CLUES
+# Initialize random
+random.seed()
+
+first_level = Level()
+first_clue = Clue()
+second_clue = Clue()
+third_clue = Clue()
+first_clue.subtitle_list = ['Bonjour', 'Salut', 'Comment ça va aujourd\'hui ?', 'Plutôt pas trop mal et toi ?', 'Easy']
+second_clue.subtitle_list = ['Hola', 'Buenos dias', 'Como estas ?', 'Yo voy bien y tu', 'Bien gracias']
+third_clue.subtitle_list = ['Guten Tag', 'Hallo', 'Wie geht es dir heute?', 'Lieber nicht schlecht und du?', 'Mir geht es gut, danke']
+clue_list = [first_clue, second_clue, third_clue]
+for clue in clue_list:
+    first_level.add_clue(clue)
+
+# rc = first_level.get_random_clue()
+# ns = rc.get_next_subtitle()
+#
+# while ns:
+#     print(ns)
+#     ns = rc.get_next_subtitle()
+
+
+# PYGAME
 pygame.init()
 
 # Dance pad Initialisation
@@ -56,6 +142,21 @@ screen = pygame.display.set_mode(size)
 
 clock = pygame.time.Clock()
 
+# Fonts
+font_path = "./fonts/visitor1.ttf"
+visitor_font = pygame.font.Font(font_path, 45)
+
+text_interact_clue = visitor_font.render('CLUE (Press key)', 1, (0, 0, 0))
+
+# Level
+current_level = first_level
+clue_interact_display = False
+current_clue = None
+clue_enabled = False
+subtitle_duration = subtitle_min_duration
+subtitle_start_time = 0
+subtitle_text = ''
+
 index_view = 1
 btn_left_pressed = True
 btn_right_pressed = True
@@ -68,7 +169,7 @@ dp_output = [0 for i in range(10)]
 images_count = 631
 
 # Time
-travel_time = 60
+travel_time = 180
 total_time = 0
 delta_time = 1
 time_since_last_image = 0
@@ -101,9 +202,19 @@ inside_width = progress_rect_outside.w-(progress_bar_inside_diff*4)
 inside_height = progress_rect_outside.h-(progress_bar_inside_diff*4)
 split_width = (inside_width - ((progress_bar_splits-1)*progress_bar_inside_diff))/progress_bar_splits
 
+
 # Speedometer
-speedometer_center_x = int(speedometer_left+(speedometer_width/2))
-speedometer_center_y = int(speedometer_top+(speedometer_height/2))
+
+speedometer_angle_min = 90 + (speedometer_global_angle/2)
+speedometer_angle_max = 90 - (speedometer_global_angle/2)
+
+speedometer_main_needle_angle_degrees = speedometer_angle_min
+
+# Clue area
+clue_min_angle = int(math.degrees(get_angle_dial(speedometer_global_angle, max_image_speed*clue_range_min, max_image_speed)))
+clue_max_angle = int(math.degrees(get_angle_dial(speedometer_global_angle, max_image_speed*clue_range_max, max_image_speed)))
+
+print('Min angle clue : ', clue_min_angle, 'Max angle clue : ', clue_max_angle)
 
 
 while 1:
@@ -145,6 +256,13 @@ while 1:
                     if not current_image_speed:
                         index_view += 1
 
+            # UP Button
+            if dp_output[2] or getattr(event, 'key', False) == K_o:
+                if clue_interact_display:
+                    clue_enabled = True
+                    clue_interact_display = False
+
+
     # Time Calc
     elapsed = clock.get_time()/1000
     total_time += elapsed
@@ -167,9 +285,15 @@ while 1:
         # Speed to gain or loss in one second
         image_speed_deceleration = (mapped_current_key_speed - current_image_speed)/total_time
 
+        # Deceleration
+        if mapped_current_key_speed < current_image_speed:
+            # Reset foot order when speed is going down
+            btn_left_pressed = True
+            btn_right_pressed = True
+
         last_total_time = total_time
 
-        print('acceleration :', image_speed_deceleration)
+        # print('acceleration :', image_speed_deceleration)
 
         reset_loop = True
 
@@ -178,9 +302,6 @@ while 1:
         current_image_speed += image_speed_deceleration * (elapsed/last_total_time)
         if current_image_speed < 0:
             current_image_speed = 0
-        # Reset foot order when speed is going down
-        btn_left_pressed = True
-        btn_right_pressed = True
     # Acceleration
     elif mapped_current_key_speed > current_image_speed:
         current_image_speed += image_speed_deceleration * (elapsed/last_total_time)
@@ -195,8 +316,8 @@ while 1:
         reset_loop = False
         total_time = 0
         key_pressed_count = 0
-        print('===== ', current_key_speed, ' =====')
-        print('##### ', current_image_speed, ' #####')
+        # print('===== ', current_key_speed, ' =====')
+        # print('##### ', current_image_speed, ' #####')
 
     # Load image
     current_view = pygame.image.load(f'maps/gsv_{index_view}.jpg')
@@ -205,6 +326,60 @@ while 1:
     # Draw image
     screen.fill(black)
     screen.blit(current_view, current_view_rect)
+
+    # CLUES
+
+    # Check if the main speed needle is inside the clue area
+    if speedometer_main_needle_angle_degrees >= clue_max_angle and speedometer_main_needle_angle_degrees <= clue_min_angle :
+        # Check if there is no clue enabled currently
+        if not clue_enabled:
+            # Check if a clue has already been loaded
+            if current_clue:
+                clue_interact_display = True
+            # A new clue has to be loaded
+            else:
+                clue = current_level.get_random_clue()
+                # Check if there's a clue left inside this level
+                if clue:
+                    clue_interact_display = True
+                    current_clue = clue
+                # No clue left
+                else:
+                    clue_interact_display = False
+    # Outside the clue area
+    else:
+        clue_interact_display = False
+
+
+    if clue_interact_display:
+        print('Clue UP')
+        screen.blit(text_interact_clue, (screen_width/2 - (text_interact_clue.get_width()/2), 120))
+    else:
+        print('Clue DOWN')
+
+    if clue_enabled:
+        print('CLUE ENABLED')
+
+        if ((pygame.time.get_ticks() - subtitle_start_time)/1000) > subtitle_duration:
+
+            subtitle = current_clue.get_next_subtitle()
+
+            # This clue has no more subtitle
+            if not subtitle:
+                clue_enabled = False
+                current_clue = None
+            # Prepare the subtitle to be displayed
+            else:
+                subtitle_duration = max(subtitle_min_duration, len(subtitle) * subtitle_duration_by_char)
+                print('SUBTITLE : ', subtitle_duration)
+                subtitle_start_time = pygame.time.get_ticks()
+                subtitle_text = visitor_font.render(subtitle, 1, (0, 0, 0))
+        else:
+            screen.blit(subtitle_text, (screen_width/2 - (subtitle_text.get_width()/2), 700))
+
+    else:
+        print('CLUE DISABLED')
+
 
     # PROGRESS BAR
     # Draw progress bar outline
@@ -219,7 +394,7 @@ while 1:
 
     # Split progression
     split_completion = int(completion/(1/progress_bar_splits))
-
+    # Draw each split inside the bar
     for i in range(split_completion):
         progress_rect_inside = Rect(progress_rect_outside.left+((i+2)*progress_bar_inside_diff)+(i*split_width), progress_rect_outside.top+(2*progress_bar_inside_diff), split_width, inside_height)
         pygame.draw.rect(screen, BLACK, progress_rect_inside, 0)
@@ -228,6 +403,8 @@ while 1:
     speedometer_main_needle_angle = get_angle_dial(speedometer_global_angle, current_image_speed, max_image_speed)
     speedometer_main_needle_end_x = speedometer_center_x + math.cos(speedometer_main_needle_angle)*speedometer_main_needle_lenght
     speedometer_main_needle_end_y = speedometer_center_y - math.sin(speedometer_main_needle_angle)*speedometer_main_needle_lenght
+
+    speedometer_main_needle_angle_degrees = int(math.degrees(speedometer_main_needle_angle))
 
     speedometer_future_needle_angle = get_angle_dial(speedometer_global_angle, mapped_current_key_speed, max_image_speed)
     speedometer_future_needle_end_x = speedometer_center_x + math.cos(speedometer_future_needle_angle)*speedometer_future_needle_lenght
@@ -238,11 +415,19 @@ while 1:
     pygame.gfxdraw.aacircle(screen, speedometer_center_x, speedometer_center_y, speedometer_radius, BLACK)
     #pygame.gfxdraw.arc(screen, speedometer_center_x, speedometer_center_y, speedometer_radius, 180,  0, RED)
 
+    # Clue area
+    draw_aa_filled_pie(screen, speedometer_center_x, speedometer_center_y, clue_radius, clue_max_angle, clue_min_angle, AGREEN)
+
+    # Display Acceleration and Deceleration between needles
+
     # Angle between needle
     delta_needle = speedometer_future_needle_angle - speedometer_main_needle_angle
     # Angles in degrees and inverted ... arc function doesnt use geometric sense
     speedometer_main_needle_degrees = -int(math.degrees(speedometer_main_needle_angle))
     speedometer_future_needle_degrees = -int(math.degrees(speedometer_future_needle_angle))
+
+    #print(speedometer_main_needle_degrees, speedometer_future_needle_degrees)
+
     if(delta_needle < 0):
         # Acceleration
         pygame.gfxdraw.arc(screen, speedometer_center_x, speedometer_center_y, speedometer_future_needle_lenght, speedometer_main_needle_degrees, speedometer_future_needle_degrees, GREEN)
