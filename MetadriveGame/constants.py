@@ -28,9 +28,9 @@ progress_bar_inside_diff = 3
 progress_bar_splits = 20
 
 # Speedometer
-speedometer_center_x = 400
-speedometer_center_y = 400
-speedometer_radius = 200
+speedometer_center_x = 200
+speedometer_center_y = 1700
+speedometer_radius = 150
 
 speedometer_main_needle_lenght = int(speedometer_radius * 0.75)
 speedometer_future_needle_lenght = int(speedometer_radius * 0.5)
