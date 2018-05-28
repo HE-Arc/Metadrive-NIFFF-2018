@@ -1,23 +1,30 @@
 """Constants of Metadrive game"""
 
+DEBUG = False
+
 # Main loop tick rate
-tick_rate = 60 # 30 tick per seconds
+tick_rate = 30 # 30 tick per seconds
 
 # Default window size
 screen_height_default = 1920 #640
 screen_width_default =  1080 #640
+
+# Parameters
+inactivity_time_before_demo = 30000 # in ms
 
 # Icon and window title
 icon_image = "images/"
 window_title = "Metadrive"
 
 # Colors
-BLACK =  (  0,   0,   0, 200)
-WHITE =  (255, 255, 255)
-RED   =  (255,   0,   0)
-GREEN =  (  0, 255,   0)
-BLUE  =  (  0,   0, 255)
-AGREEN = (  0, 255,   0, 70)
+BLACK  =  (  0,   0,   0, 200)
+WHITE  =  (255, 255, 255)
+RED    =  (255,   0,   0)
+GREEN  =  (  0, 255,   0)
+BLUE   =  (  0,   0, 255)
+AGREEN =  (  0, 255,   0, 70)
+AWHITE =  (255, 255, 255, 70)
+PINK   =  (235, 62, 149)#(255, 72, 220)
 
 # HUD
 # Progress Bar
@@ -29,13 +36,18 @@ progress_bar_splits = 20
 
 # Speedometer
 speedometer_center_x = 200
-speedometer_center_y = 1700
+speedometer_center_y = 600 #1700
 speedometer_radius = 150
+speedometer_extern_radius = int(speedometer_radius * 1.1)
 
 speedometer_main_needle_lenght = int(speedometer_radius * 0.75)
 speedometer_future_needle_lenght = int(speedometer_radius * 0.5)
 speedometer_needle_semiwidth = 2
 speedometer_global_angle = 260
+
+number_of_marks = 9
+speedometer_inner_radius_marks = int(speedometer_radius * 0.9)
+speedometer_outer_radius_marks = int(speedometer_radius * 1.1)
 
 speedometer_center_circle_radius = 10
 
