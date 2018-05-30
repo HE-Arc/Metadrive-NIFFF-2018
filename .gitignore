@@ -8,6 +8,9 @@ StreetviewScrapper/api_key.txt
 MetadriveGame/maps/
 StreetviewScrapper/maps/
 
+# SUBTITLES
+MetadriveGame/levels.xml
+
 # GPX FILES
 StreetviewScrapper/gpx_data/
 

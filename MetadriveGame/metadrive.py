@@ -4,6 +4,25 @@ from pygame.gfxdraw import *
 from pygame.locals import *
 from constants import *
 from enum import Enum
+from lxml import etree
+
+def map_key_speed_to_image_speed(min_key_speed, max_key_speed, min_image_speed, max_image_speed, current_key_speed):
+    slow_image_speed_percent = 0.25
+    slow_key_speed_percent = 0.5
+    real_delta_image_speed = max_image_speed - min_image_speed
+    slow_delta_image_speed = real_delta_image_speed * slow_image_speed_percent
+    fast_delta_image_speed = real_delta_image_speed * (1 - slow_image_speed_percent)
+
+    real_delta_key_speed = max_key_speed - min_key_speed
+    ratio = current_key_speed / real_delta_key_speed
+
+    if ratio <= slow_key_speed_percent:
+        ratio = current_key_speed / (real_delta_key_speed * slow_key_speed_percent)
+        current_image_speed = (ratio * slow_delta_image_speed) + min_image_speed
+    else:
+        ratio = (current_key_speed - (real_delta_key_speed * slow_key_speed_percent)) / (real_delta_key_speed * (1-slow_key_speed_percent))
+        current_image_speed = (ratio * fast_delta_image_speed) + min_image_speed + slow_delta_image_speed
+    return current_image_speed
 
 def map_range_to_range(min_a, max_a, min_b, max_b, value_a):
     ratio = value_a / (max_a - min_a)
@@ -84,10 +103,17 @@ class Level:
         self.id = Level.id
         Level.id += 1
 
+        self.images_cache = []
+        self.images_cache.append('empty')
         self.new_clue_list = []
         self.old_clue_list = []
+        self.images_count = 150
 
         Level.level_list.append(self)
+
+        self.load_images('path')
+
+        self.image_rect = self.images_cache[1].get_rect()
 
     def add_clue(self, clue):
         self.new_clue_list.append(clue)
@@ -106,8 +132,14 @@ class Level:
         for clue in self.new_clue_list:
             clue.reset()
 
-    def load_clues(self, filename):
-        pass
+    def load_images(self, path):
+        for i in range(self.images_count):
+            # TODO : use path
+            index = i + 1
+            print('Image ', index, ' added to level ', self.id)
+            self.images_cache.append(pygame.image.load(f'maps/gsv_{index}.jpg'))
+
+
 
 class Clue:
     """Class containing one set of subtitles for one level"""
@@ -132,49 +164,25 @@ class Clue:
 # Initialize random
 random.seed()
 
+# Parse XML file
+tree = etree.parse('./levels.xml')
 
-# TODO : TEMPORARY Part to create and initialize levels manually
+root = tree.getroot()
 
-first_level = Level()
-first_clue = Clue()
-second_clue = Clue()
-third_clue = Clue()
-first_clue.subtitle_list = ['L1_Bonjour', 'Salut', 'Comment ça va aujourd\'hui ?', 'Plutôt pas trop mal et toi ?', 'Easy']
-second_clue.subtitle_list = ['L1_Hola', 'Buenos dias', 'Como estas ?', 'Yo voy bien y tu', 'Bien gracias']
-third_clue.subtitle_list = ['L1_Guten Tag', 'Hallo', 'Wie geht es dir heute?', 'Lieber nicht schlecht und du?', 'Mir geht es gut, danke']
-clue_list = [first_clue, second_clue, third_clue]
-for clue in clue_list:
-    first_level.add_clue(clue)
-
-second_level = Level()
-first_clue = Clue()
-second_clue = Clue()
-third_clue = Clue()
-first_clue.subtitle_list = ['L2_Bonjour', 'Salut', 'Comment ça va aujourd\'hui ?', 'Plutôt pas trop mal et toi ?', 'Easy']
-second_clue.subtitle_list = ['L2_Hola', 'Buenos dias', 'Como estas ?', 'Yo voy bien y tu', 'Bien gracias']
-third_clue.subtitle_list = ['L2_Guten Tag', 'Hallo', 'Wie geht es dir heute?', 'Lieber nicht schlecht und du?', 'Mir geht es gut, danke']
-clue_list = [first_clue, second_clue, third_clue]
-for clue in clue_list:
-    second_level.add_clue(clue)
-
-third_level = Level()
-first_clue = Clue()
-second_clue = Clue()
-third_clue = Clue()
-first_clue.subtitle_list = ['L3_Bonjour', 'Salut', 'Comment ça va aujourd\'hui ?', 'Plutôt pas trop mal et toi ?', 'Easy']
-second_clue.subtitle_list = ['L3_Hola', 'Buenos dias', 'Como estas ?', 'Yo voy bien y tu', 'Bien gracias']
-third_clue.subtitle_list = ['L3_Guten Tag', 'Hallo', 'Wie geht es dir heute?', 'Lieber nicht schlecht und du?', 'Mir geht es gut, danke']
-clue_list = [first_clue, second_clue, third_clue]
-for clue in clue_list:
-    third_level.add_clue(clue)
-
-
-# rc = first_level.get_random_clue()
-# ns = rc.get_next_subtitle()
-#
-# while ns:
-#     print(ns)
-#     ns = rc.get_next_subtitle()
+# Iterate over all levels in the xml file
+for level in root.getchildren():
+    if level.tag == 'level':
+        new_level = Level()
+        print('= New level added with id : ', new_level.id)
+        clues = level.getchildren()[0]
+        if clues.tag == 'clues':
+            for clue in clues.getchildren():
+                new_clue = Clue()
+                new_level.add_clue(new_clue)
+                print('== New clue added to level ', new_level.id, ' with text :')
+                for sub in clue.getchildren():
+                    new_clue.subtitle_list.append(sub.text)
+                    print(sub.text)
 
 
 # PYGAME
@@ -216,7 +224,6 @@ visitor_font_main_title = pygame.font.Font(font_path, 90)
 
 text_interact_clue = textOutline(visitor_font, 'CLUE ( Press UP key )', PINK, (1, 1, 1))
 text_main_title = textOutline(visitor_font_main_title, 'METADRIVE', PINK, (1, 1, 1))
-#text_interact_clue = visitor_font.render(, 1, (0, 0, 0))
 
 # General
 state = State.MENU
@@ -241,7 +248,7 @@ reset_loop = False
 # Dancepad outputs (1 = enabled, 0 = disabled)
 dp_output = [0] * 10 # [0 for i in range(10)]
 
-images_count = 1032
+images_count = 150 #1032
 
 # Time
 travel_time = 60
@@ -262,7 +269,7 @@ mapped_current_key_speed = min_key_speed
 # Image Speed
 average_image_speed = images_count / travel_time
 min_image_speed = 1
-max_image_speed = 12 # math.ceil(average_image_speed*2)
+max_image_speed = 20 # math.ceil(average_image_speed*2)
 current_image_speed = min_image_speed
 last_image_speed = min_image_speed
 image_speed_deceleration = 0
@@ -302,8 +309,6 @@ for i in range(number_of_marks):
 
     marks.append([(mark_start_x, mark_start_y), (mark_end_x, mark_end_y)])
 
-
-
 # Clue area
 clue_min_angle = int(math.degrees(get_angle_dial(speedometer_global_angle, max_image_speed*clue_range_min, min_image_speed, max_image_speed)))
 clue_max_angle = int(math.degrees(get_angle_dial(speedometer_global_angle, max_image_speed*clue_range_max, min_image_speed, max_image_speed)))
@@ -341,7 +346,7 @@ while 1:
             last_activity = pygame.time.get_ticks()
 
             # Left Button
-            if dp_output[0] or getattr(event, 'key', False) == K_k:
+            if dp_output[left_arrow] or getattr(event, 'key', False) == K_k:
                 if state == State.LEVEL :
                     if btn_right_pressed:
                         btn_left_pressed = True
@@ -354,7 +359,7 @@ while 1:
                     state = State.LEVEL
 
             # Right Button
-            if dp_output[3] or getattr(event, 'key', False) == K_l: # 1 polska | 3 chinese
+            if dp_output[right_arrow] or getattr(event, 'key', False) == K_l: # 1 polska | 3 chinese
                 if state == State.LEVEL :
                     if btn_left_pressed:
                         btn_left_pressed = False
@@ -365,7 +370,7 @@ while 1:
                             index_view += 1
 
             # UP Button
-            if dp_output[2] or getattr(event, 'key', False) == K_o:
+            if dp_output[up_arrow] or getattr(event, 'key', False) == K_o:
                 if state == State.LEVEL :
                     if clue_interact_display:
                         clue_enabled = True
@@ -375,7 +380,7 @@ while 1:
                     current_level = Level.level_list[(Level.level_list.index(current_level) - 1) % len(Level.level_list)]
 
             # DOWN Button
-            if dp_output[1] or getattr(event, 'key', False) == K_m:  # 3 polska | 1 chinese
+            if dp_output[down_arrow] or getattr(event, 'key', False) == K_m:  # 3 polska | 1 chinese
                 if state == State.LEVEL :
                     pass
                 elif state == State.MENU :
@@ -394,8 +399,6 @@ while 1:
 
         elapsed = clock.get_time()/1000.0
 
-        #print(elapsed)
-
         if not last_speed_calc:
             last_speed_calc = pygame.time.get_ticks()
             # print('last_speed calc')
@@ -406,28 +409,27 @@ while 1:
         #     print('real speed 1 : ', 1/((pygame.time.get_ticks() - last_image_time)/1000))
 
         # Switching images
-        if current_image_speed and ((pygame.time.get_ticks() - last_image_time)/1000.0 >= 1.0/current_image_speed): # ~ 16 ms
-            last_image_time =  pygame.time.get_ticks()
+        time_since_last_image = (pygame.time.get_ticks() - last_image_time)/1000.0
+        if not current_image_speed:
+            last_image_time =  pygame.time.get_ticks() # set time for the first image being displayed
+        elif (time_since_last_image >= 1.0/current_image_speed):
+            # print(((time_since_last_image - (1.0/current_image_speed)) * 1000.0))
+            last_image_time =  pygame.time.get_ticks() - ((time_since_last_image - (1.0/current_image_speed)) * 1000.0) # last part substract number of ms lost
             # Next image
             index_view += 1
-            print(index_view)
 
         # Level has still more images
         if index_view <= images_count:
-            # Load image
-            current_view = pygame.image.load(f'maps/gsv_{index_view}.jpg')
-            current_view_rect = current_view.get_rect()
-
             # Draw image
-            screen.blit(current_view, current_view_rect)
+            screen.blit(current_level.images_cache[index_view], current_level.image_rect)
         # End of the level
         else:
             state = State.MENU
+            index_view = 1
+            # TODO : Reset speed and other things ... reset method ?
 
         # Calculating speeds
         if total_time > delta_time:
-
-            print(total_time)
 
             print('real speed 2 : ', (index_view - saved_index_view)/total_time)
             saved_index_view = index_view
@@ -665,18 +667,19 @@ while 1:
 #     clock.tick(tick_rate)
 #
 #     elapsed = clock.get_time()/1000
-#     #
+#
 #     # # Load image
 #     # current_view = pygame.image.load(f'maps/gsv_{index_view}.jpg')
 #     # current_view_rect = current_view.get_rect()
 #     #
 #     # # Draw image
 #     # screen.blit(current_view, current_view_rect)
-#     #
+#
+#     screen.blit(current_level.images_cache[index_view], current_level.image_rect)
 #     index_view += 1
 #
 #     print(elapsed, index_view)
 #
 #
 #
-#     #pygame.display.flip()
+#     pygame.display.flip()

@@ -1,6 +1,6 @@
 """Constants of Metadrive game"""
 
-DEBUG = False
+DEBUG = True
 
 # Main loop tick rate
 tick_rate = 30 # 30 tick per seconds
@@ -8,6 +8,20 @@ tick_rate = 30 # 30 tick per seconds
 # Default window size
 screen_height_default = 1920 #640
 screen_width_default =  1080 #640
+
+# Controls
+
+TEST_DANCEPAD = False
+
+up_arrow = 2
+left_arrow = 0
+down_arrow = 3
+right_arrow = 1
+
+if TEST_DANCEPAD:
+    down_arrow = 1
+    right_arrow = 3
+
 
 # Parameters
 inactivity_time_before_demo = 30000 # in ms
@@ -36,7 +50,7 @@ progress_bar_splits = 20
 
 # Speedometer
 speedometer_center_x = 200
-speedometer_center_y = 600 #1700
+speedometer_center_y = 600 #600
 speedometer_radius = 150
 speedometer_extern_radius = int(speedometer_radius * 1.1)
 
