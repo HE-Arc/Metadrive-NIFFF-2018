@@ -10,28 +10,30 @@ screen_height_default = 1920 #640
 screen_width_default =  1080 #640
 
 # Controls
-
 TEST_DANCEPAD = False
 
+# Defaults
 up_arrow = 2
 left_arrow = 0
 down_arrow = 3
 right_arrow = 1
 
+# Chinese dancepad
 if TEST_DANCEPAD:
     down_arrow = 1
     right_arrow = 3
 
-
 # Parameters
 inactivity_time_before_demo = 30000 # in ms
+fullscreen = False
 
 # Icon and window title
 icon_image = "images/"
 window_title = "Metadrive"
 
 # Colors
-BLACK  =  (  0,   0,   0, 200)
+ABLACK  =  (  0,   0,   0, 200)
+BLACK  =  (  0,   0,   0)
 WHITE  =  (255, 255, 255)
 RED    =  (255,   0,   0)
 GREEN  =  (  0, 255,   0)

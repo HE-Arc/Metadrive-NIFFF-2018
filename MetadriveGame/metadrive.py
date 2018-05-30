@@ -1,10 +1,14 @@
-import sys, pygame, time, math, random
+import sys, pygame, time, math, random, psutil, os
 
 from pygame.gfxdraw import *
 from pygame.locals import *
 from constants import *
 from enum import Enum
 from lxml import etree
+
+# --------------------------------------------------------------------------
+# ------------------------------- METHODS ----------------------------------
+# --------------------------------------------------------------------------
 
 def map_key_speed_to_image_speed(min_key_speed, max_key_speed, min_image_speed, max_image_speed, current_key_speed):
     slow_image_speed_percent = 0.25
@@ -59,6 +63,24 @@ def draw_aa_filled_pie(surface, points , color):
     pygame.gfxdraw.aapolygon(surface, points, color)
     #pygame.gfxdraw.arc(surface, center_x, center_y, radius, -angle_b, -angle_a, color)
 
+def resetGame():
+    global index_view, last_image_time, current_key_speed, current_image_speed, clue_enabled, current_clue, last_activity, level_time
+
+    # Back to first image
+    index_view = 1
+    # Reset last image timer
+    last_image_time = 0
+    # Reset speeds
+    current_key_speed = min_key_speed
+    current_image_speed = min_image_speed
+    # Reset clues in current level
+    current_level.reset()
+    clue_enabled = False
+    current_clue = None
+    # Reset inactivity time
+    last_activity = pygame.time.get_ticks()
+    # Reset level time
+    level_time = 0
 
 # https://www.pygame.org/pcr/hollow_outline/index.php
 def textHollow(font, message, fontcolor):
@@ -88,6 +110,10 @@ def textOutline(font, message, fontcolor, outlinecolor):
     img.set_colorkey(0)
     return img
 
+# --------------------------------------------------------------------------
+# ------------------------------- CLASSES ----------------------------------
+# --------------------------------------------------------------------------
+
 class State(Enum):
     MENU = 1
     DEMO = 2
@@ -99,21 +125,28 @@ class Level:
     id = 1
     level_list = []
 
-    def __init__(self):
+    def __init__(self, images_count, duration, path):
+        # Properties
         self.id = Level.id
-        Level.id += 1
-
+        self.images_count = images_count
+        self.duration = duration
+        self.path = path
         self.images_cache = []
         self.images_cache.append('empty')
         self.new_clue_list = []
         self.old_clue_list = []
-        self.images_count = 150
 
+        # Adding this level to the level list
         Level.level_list.append(self)
 
-        self.load_images('path')
+        # Caching specified images
+        self.load_images(self.path)
 
+        # Rect for one image
         self.image_rect = self.images_cache[1].get_rect()
+
+        # Increment static value for next level
+        Level.id += 1
 
     def add_clue(self, clue):
         self.new_clue_list.append(clue)
@@ -137,9 +170,7 @@ class Level:
             # TODO : use path
             index = i + 1
             print('Image ', index, ' added to level ', self.id)
-            self.images_cache.append(pygame.image.load(f'maps/gsv_{index}.jpg'))
-
-
+            self.images_cache.append(pygame.image.load(f'maps/{self.path}/gsv_{index}.jpg'))
 
 class Clue:
     """Class containing one set of subtitles for one level"""
@@ -160,7 +191,10 @@ class Clue:
     def reset(self):
         self.index = 0
 
-# INIT LEVEL AND CLUES
+# --------------------------------------------------------------------------
+# ------------------------- LEVELS & CLUES INIT ----------------------------
+# --------------------------------------------------------------------------
+
 # Initialize random
 random.seed()
 
@@ -172,7 +206,7 @@ root = tree.getroot()
 # Iterate over all levels in the xml file
 for level in root.getchildren():
     if level.tag == 'level':
-        new_level = Level()
+        new_level = Level(int(level.get('distance')), int(level.get('duration')), level.get('path'))
         print('= New level added with id : ', new_level.id)
         clues = level.getchildren()[0]
         if clues.tag == 'clues':
@@ -184,6 +218,9 @@ for level in root.getchildren():
                     new_clue.subtitle_list.append(sub.text)
                     print(sub.text)
 
+# --------------------------------------------------------------------------
+# -------------------------------- PYGAME ----------------------------------
+# --------------------------------------------------------------------------
 
 # PYGAME
 pygame.init()
@@ -210,11 +247,24 @@ pygame.event.set_allowed([QUIT, KEYDOWN, KEYUP])
 # Window title
 pygame.display.set_caption(window_title)
 
-size = screen_width, screen_height = screen_width_default, screen_height_default
-black = 0, 0, 0
+# Screen management
+flags = HWSURFACE|DOUBLEBUF
 
-screen = pygame.display.set_mode(size)
+if fullscreen:
+    infoDisplay = pygame.display.Info()
+    screen_width = infoDisplay.current_w
+    screen_height = infoDisplay.current_h
+    flags = flags|FULLSCREEN
+else:
+    screen_width = screen_width_default
+    screen_height = screen_height_default
 
+screen = pygame.display.set_mode([screen_width, screen_height], flags)
+
+# Mouse
+pygame.mouse.set_visible(False)
+
+# Clock
 clock = pygame.time.Clock()
 
 # Fonts
@@ -227,6 +277,7 @@ text_main_title = textOutline(visitor_font_main_title, 'METADRIVE', PINK, (1, 1,
 
 # General
 state = State.MENU
+shutdown_incoming = False
 
 # Level
 current_level = Level.level_list[0]
@@ -248,16 +299,14 @@ reset_loop = False
 # Dancepad outputs (1 = enabled, 0 = disabled)
 dp_output = [0] * 10 # [0 for i in range(10)]
 
-images_count = 150 #1032
-
 # Time
-travel_time = 60
 total_time = 0
 delta_time = 1
 last_time = 0
 last_speed_calc = 0
 last_image_time = 0
 last_total_time = delta_time
+level_time = 0
 
 # Key Speed
 key_pressed_count = 0
@@ -267,14 +316,13 @@ current_key_speed = min_key_speed # key per second
 mapped_current_key_speed = min_key_speed
 
 # Image Speed
-average_image_speed = images_count / travel_time
 min_image_speed = 1
 max_image_speed = 20 # math.ceil(average_image_speed*2)
 current_image_speed = min_image_speed
 last_image_speed = min_image_speed
 image_speed_deceleration = 0
 
-print('Average image speed : ', average_image_speed)
+print('Min image speed : ', min_image_speed)
 print('Max image speed : ', max_image_speed)
 
 # Progress Bar
@@ -288,7 +336,6 @@ split_width = (inside_width - ((progress_bar_splits-1)*progress_bar_inside_diff)
 
 
 # Speedometer
-
 speedometer_angle_min = 90 + (speedometer_global_angle/2)
 speedometer_angle_max = 90 - (speedometer_global_angle/2)
 
@@ -315,9 +362,11 @@ clue_max_angle = int(math.degrees(get_angle_dial(speedometer_global_angle, max_i
 
 small_dial_bg_points = calc_points_aa_filled_pie(speedometer_center_x, speedometer_center_y, clue_radius, clue_max_angle, clue_min_angle)
 
-
 print('Min angle clue : ', clue_min_angle, 'Max angle clue : ', clue_max_angle)
 
+# --------------------------------------------------------------------------
+# ------------------------------ MAIN LOOP ---------------------------------
+# --------------------------------------------------------------------------
 
 while 1:
 
@@ -353,8 +402,9 @@ while 1:
                         btn_right_pressed = False
                         key_pressed_count += 1
                         # Mode one by one when key speed is not evaluated yet
-                        if not current_image_speed:
-                            index_view += 1
+                        # if not current_key_speed:
+                        #     index_view += 1
+                        # TODO : Is this useful ?
                 elif state == State.MENU :
                     state = State.LEVEL
 
@@ -366,8 +416,8 @@ while 1:
                         btn_right_pressed = True
                         key_pressed_count += 1
                         # Mode one by one when key speed is not evaluated yet
-                        if not current_image_speed:
-                            index_view += 1
+                        # if not current_key_speed:
+                        #     index_view += 1
 
             # UP Button
             if dp_output[up_arrow] or getattr(event, 'key', False) == K_o:
@@ -387,7 +437,10 @@ while 1:
                     # Next level
                     current_level = Level.level_list[(Level.level_list.index(current_level) + 1) % len(Level.level_list)]
 
-    screen.fill(black)
+            # Exit Button
+            if getattr(event, 'key', False) == K_q: sys.exit()
+
+    screen.fill(BLACK)
 
     # --------------------------------------------------------------------------
     # --------------------------------- LEVEL ----------------------------------
@@ -395,8 +448,12 @@ while 1:
 
     if state == State.LEVEL:
 
-        # Time Calc
+        if not level_time:
+            time = pygame.time.get_ticks()
+            level_time = time
+            last_image_time =  time # set time for the first image being displayed
 
+        # Time Calc
         elapsed = clock.get_time()/1000.0
 
         if not last_speed_calc:
@@ -405,28 +462,24 @@ while 1:
 
         total_time = (pygame.time.get_ticks() - last_speed_calc)/1000.0
 
-        # if last_image_time:
-        #     print('real speed 1 : ', 1/((pygame.time.get_ticks() - last_image_time)/1000))
-
         # Switching images
         time_since_last_image = (pygame.time.get_ticks() - last_image_time)/1000.0
-        if not current_image_speed:
-            last_image_time =  pygame.time.get_ticks() # set time for the first image being displayed
-        elif (time_since_last_image >= 1.0/current_image_speed):
+
+        if current_image_speed and (time_since_last_image >= 1.0/current_image_speed):
             # print(((time_since_last_image - (1.0/current_image_speed)) * 1000.0))
             last_image_time =  pygame.time.get_ticks() - ((time_since_last_image - (1.0/current_image_speed)) * 1000.0) # last part substract number of ms lost
             # Next image
             index_view += 1
 
-        # Level has still more images
-        if index_view <= images_count:
+        # Level has still more images AND hasnt run out of time
+        if index_view <= current_level.images_count and (pygame.time.get_ticks() - level_time)/1000.0 <= current_level.duration:
             # Draw image
             screen.blit(current_level.images_cache[index_view], current_level.image_rect)
         # End of the level
         else:
+            resetGame()
             state = State.MENU
-            index_view = 1
-            # TODO : Reset speed and other things ... reset method ?
+
 
         # Calculating speeds
         if total_time > delta_time:
@@ -482,7 +535,7 @@ while 1:
 
         # CLUES
 
-        # Check if the main speed needle is inside the clue area
+        # Checks if the main speed needle is inside the clue area
         if speedometer_main_needle_angle_degrees >= clue_max_angle and speedometer_main_needle_angle_degrees <= clue_min_angle :
             # Check if there is no clue enabled currently
             if not clue_enabled:
@@ -503,19 +556,18 @@ while 1:
         else:
             clue_interact_display = False
 
-
+        # INSIDE CLUE AREA : Clue available to be activated
         if clue_interact_display:
-            # print('Clue UP')
             screen.blit(text_interact_clue, (screen_width/2 - (text_interact_clue.get_width()/2), 300))
+        # OUTSIDE CLUE AREA : Clue not available to be activated
         else:
             pass
-            # print('Clue DOWN')
 
+        # CLUE ENABLED : A clue has been enabled
         if clue_enabled:
-            # print('CLUE ENABLED')
-
+            # Checks subtitles duration
             if ((pygame.time.get_ticks() - subtitle_start_time)/1000.0) > subtitle_duration:
-
+                # Fetch the next subtitle for this clue
                 subtitle = current_clue.get_next_subtitle()
 
                 # This clue has no more subtitle
@@ -529,21 +581,19 @@ while 1:
                     subtitle_start_time = pygame.time.get_ticks()
                     subtitle_text = textOutline(visitor_font, subtitle, PINK, (1, 1, 1))
                     # subtitle_text = visitor_font.render(subtitle, 1, (0, 0, 0))
+            # Current subtitle has to stay on screen a little more
             else:
                 screen.blit(subtitle_text, (screen_width/2 - (subtitle_text.get_width()/2), 1200))
-
-
+        # NO CLUE CURRENTLY ENABLED : No subtitles are currently displayed
         else:
             pass
-            # print('CLUE DISABLED')
-
 
         # PROGRESS BAR
         # Draw progress bar outline
         pygame.draw.rect(screen, BLACK, progress_rect_outside, 5)
 
         # Draw progress completion
-        completion = index_view/images_count
+        completion = index_view/current_level.images_count
 
         # One-block progression
         # progress_rect_inside = Rect(progress_rect_outside.left+progress_bar_inside_diff, progress_rect_outside.top+progress_bar_inside_diff, (progress_rect_outside.w-(2*progress_bar_inside_diff))*completion, progress_rect_outside.h-(2*progress_bar_inside_diff))
@@ -572,7 +622,7 @@ while 1:
         pygame.gfxdraw.filled_circle(screen, speedometer_center_x, speedometer_center_y, speedometer_extern_radius, AWHITE)
         pygame.gfxdraw.aacircle(screen, speedometer_center_x, speedometer_center_y, speedometer_extern_radius, AWHITE)
         # Smaller background
-        draw_aa_filled_pie(screen, large_dial_bg_points, BLACK)
+        draw_aa_filled_pie(screen, large_dial_bg_points, ABLACK)
 
         # Speed Marks
         for mark in marks:
@@ -589,8 +639,6 @@ while 1:
         # Angles in degrees and inverted ... arc function doesnt use geometric sense
         speedometer_main_needle_degrees = -int(math.degrees(speedometer_main_needle_angle))
         speedometer_future_needle_degrees = -int(math.degrees(speedometer_future_needle_angle))
-
-        #print(speedometer_main_needle_degrees, speedometer_future_needle_degrees)
 
         if DEBUG :
             if(delta_needle < 0):
@@ -653,10 +701,20 @@ while 1:
             print('demo on level :', current_level.id)
             state = State.LEVEL
 
+    # TODO : Checks not in every tick perhaps ?
+    # PC Power management
+    if psutil.sensors_battery() is not None:
+        if not psutil.sensors_battery().power_plugged and not shutdown_incoming:
+            print('POWER UNPLUGGED')
+            print('PC will be shutdown if the power remain unplugged in the next 60 seconds')
+            shutdown_incoming = True
+            os.system('shutdown -s -t 60')
+        elif psutil.sensors_battery().power_plugged and shutdown_incoming:
+            os.system('shutdown -a')
+            shutdown_incoming = False
 
 
-
-
+    # Updates screen
     pygame.display.flip()
 
 # TESTS WHILE
