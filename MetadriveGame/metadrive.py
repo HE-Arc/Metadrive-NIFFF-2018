@@ -108,10 +108,10 @@ def draw_aa_filled_pie(surface, points, color):
     #                    -angle_a, color)
 
 
-def resetGame():
+def reset_game():
     """ Reset the global variable after a level has ended """
     global index_view, last_image_time, current_key_speed, current_image_speed
-    global clue_enabled, current_clue, last_activity, level_time
+    global clue_enabled, current_clue, last_activity, level_start_time
     global key_pressed_count
 
     # Back to first image
@@ -129,7 +129,16 @@ def resetGame():
     # Reset inactivity time
     last_activity = pygame.time.get_ticks()
     # Reset level time
-    level_time = 0
+    level_start_time = 0
+
+
+def start_transition(surface):
+    # surface.fill(ABLACK)
+    pygame.gfxdraw.rectangle(
+        surface,
+        Rect(0, 0, screen_width, screen_height),
+        ABLACK
+    )
 
 
 # https://www.pygame.org/pcr/hollow_outline/index.php
@@ -171,9 +180,7 @@ def textOutline(font, message, fontcolor, outlinecolor):
 class State(Enum):
     """ Class representing the different stat of the game """
     MENU = 1
-    DEMO = 2
-    LEVEL = 3
-    LEVEL_END = 4
+    LEVEL = 2
 
 
 class Level:
@@ -333,13 +340,13 @@ else:
 screen = pygame.display.set_mode([screen_width, screen_height], flags)
 
 # Mouse
-pygame.mouse.set_visible(False)
+#pygame.mouse.set_visible(False)
 
 # Clock
 clock = pygame.time.Clock()
 
 # Fonts
-font_path = "./fonts/visitor1.ttf"
+font_path = "./fonts/terminal-grotesque.ttf"
 visitor_font = pygame.font.Font(font_path, 45)
 visitor_font_main_title = pygame.font.Font(font_path, 90)
 
@@ -353,6 +360,9 @@ text_main_title = textOutline(
 # General
 state = State.MENU
 shutdown_incoming = False
+transition_index = 0
+transition_opacity_step = transition_opacity_delta
+transition_state = False
 
 # Level
 current_level = Level.level_list[0]
@@ -381,7 +391,7 @@ last_time = 0
 last_speed_calc = 0
 last_image_time = 0
 last_total_time = delta_time
-level_time = 0
+level_start_time = 0
 
 # Key Speed
 key_pressed_count = 0
@@ -391,8 +401,8 @@ current_key_speed = min_key_speed  # key per second
 mapped_current_key_speed = min_key_speed
 
 # Image Speed
-min_image_speed = 1
-max_image_speed = 20  # math.ceil(average_image_speed*2)
+min_image_speed = 0.3
+max_image_speed = 16  # math.ceil(average_image_speed*2)
 current_image_speed = min_image_speed
 last_image_speed = min_image_speed
 image_speed_deceleration = 0
@@ -409,8 +419,8 @@ progress_rect_outside = Rect(
     progress_bar_height
 )
 
-inside_width = progress_rect_outside.w-(progress_bar_inside_diff*4)
-inside_height = progress_rect_outside.h-(progress_bar_inside_diff*4)
+inside_width = progress_rect_outside.w - (progress_bar_inside_diff*4)
+inside_height = progress_rect_outside.h - (progress_bar_inside_diff*4)
 split_width = (inside_width - ((progress_bar_splits-1)
                * progress_bar_inside_diff)) / progress_bar_splits
 
@@ -511,7 +521,7 @@ while 1:
                         #     index_view += 1
                         # TODO : Is this useful ?
                 elif state == State.MENU:
-                    state = State.LEVEL
+                    transition_state = State.LEVEL
 
             # Right Button
             if dp_output[right_arrow] or getattr(event, 'key', False) == K_l:
@@ -560,9 +570,9 @@ while 1:
 
     if state == State.LEVEL:
 
-        if not level_time:
+        if not level_start_time:
             time = pygame.time.get_ticks()
-            level_time = time
+            level_start_time = time
             # Set time for the first image being displayed
             last_image_time = time
 
@@ -588,19 +598,26 @@ while 1:
             # Next image
             index_view += 1
 
+        time_in_level = (pygame.time.get_ticks()-level_start_time) / 1000.0
+        level_remaining_time = current_level.duration - time_in_level
+
+        print(time_in_level, level_remaining_time)
+
         # Level has still more images AND hasnt run out of time
         if (index_view <= current_level.images_count
-                and ((pygame.time.get_ticks()-level_time) / 1000.0
-                     <= current_level.duration)):
-            # Draw image
-            screen.blit(
-                current_level.images_cache[index_view],
-                current_level.image_rect
-            )
+                and (time_in_level <= current_level.duration)):
+            last_index_view = index_view
         # End of the level
         else:
-            resetGame()
-            state = State.MENU
+            transition_state = State.MENU
+
+        # Draw image
+        screen.blit(
+            current_level.images_cache[last_index_view],
+            current_level.image_rect
+        )
+
+        print('image en cours : ', last_index_view)
 
         # Calculating speeds
         if total_time > delta_time:
@@ -657,9 +674,35 @@ while 1:
             last_speed_calc = 0
             key_pressed_count = 0
 
-            if DEBUG:
-                print('===== ', current_key_speed, ' =====')
-                print('##### ', current_image_speed, ' #####')
+            print('===== ', current_key_speed, ' =====')
+            print('##### ', current_image_speed, ' #####')
+
+        # REAMINING DISTANCE
+        text_dist_remaining = textOutline(
+            visitor_font,
+            'DISTANCE: ' + str(current_level.images_count - index_view),
+            PINK,
+            (1, 1, 1)
+        )
+        screen.blit(
+            text_dist_remaining,
+            (screen_width/2 - (text_dist_remaining.get_width()/2), 400)
+        )
+        # REMAINING TIME
+        # Level has nearly timed out
+        if level_remaining_time <= 10 and level_remaining_time > 0:
+            print('REMAINING')
+
+            text_time_remaining = textOutline(
+                visitor_font,
+                'REMAINING TIME: ' + str(int(level_remaining_time)),
+                PINK,
+                (1, 1, 1)
+            )
+            screen.blit(
+                text_time_remaining,
+                (screen_width/2 - (text_time_remaining.get_width()/2), 500)
+            )
 
         # CLUES
 
@@ -747,7 +790,11 @@ while 1:
         # pygame.draw.rect(screen, BLACK, progress_rect_inside, 0)
 
         # Split progression
-        split_completion = int(completion/(1/progress_bar_splits))
+        split_completion = min(
+            int(completion/(1/progress_bar_splits)),
+            progress_bar_splits
+        )
+
         # Draw each split inside the bar
         for i in range(split_completion):
             progress_rect_inside = Rect(
@@ -913,13 +960,6 @@ while 1:
         pygame.gfxdraw.filled_polygon(screen, main_needle_points, WHITE)
 
     # -------------------------------------------------------------------------
-    # ----------------------------- LEVEL END ---------------------------------
-    # -------------------------------------------------------------------------
-
-    elif state == State.LEVEL_END:
-        pass
-
-    # -------------------------------------------------------------------------
     # -------------------------------- MENU -----------------------------------
     # -------------------------------------------------------------------------
 
@@ -961,7 +1001,7 @@ while 1:
             # Random level
             current_level = random.choice(Level.level_list)
             print('demo on level :', current_level.id)
-            state = State.LEVEL
+            transition_state = State.LEVEL
 
     # TODO : Checks not in every tick perhaps ?
     # PC Power management
@@ -975,7 +1015,30 @@ while 1:
             os.system('shutdown -s -t 60')
         elif psutil.sensors_battery().power_plugged and shutdown_incoming:
             os.system('shutdown -a')
-            shutdown_incoming = False
+            shutdown_incoming = False        # Draw transition
+
+    # Transition Management
+    if transition_state:
+
+        transition_index += transition_opacity_step
+
+        # Trans switch
+        if transition_index > 255:
+            transition_index = 255
+            transition_opacity_step = -transition_opacity_step
+            reset_game()
+            state = transition_state
+
+        elif transition_index < 0:
+            transition_index = 0
+            transition_state = False
+            transition_opacity_step = -transition_opacity_step
+
+        pygame.gfxdraw.box(
+            screen,
+            current_level.image_rect,
+            (255, 255, 255, transition_index)
+        )
 
     # Updates screen
     pygame.display.flip()
