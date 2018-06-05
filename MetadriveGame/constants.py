@@ -26,7 +26,8 @@ if TEST_DANCEPAD:
     right_arrow = 3
 
 # Parameters
-inactivity_time_before_demo = 30000  # in ms
+inactivity_time_in_menu = 30000  # in ms
+inactivity_time_in_game = 10000  # in ms
 fullscreen = False
 
 # Icon and window title
@@ -54,7 +55,7 @@ progress_bar_splits = 20
 
 # Speedometer
 speedometer_center_x = 200
-speedometer_center_y = 1700  # 600
+speedometer_center_y = 600  # 600
 speedometer_radius = 150
 speedometer_extern_radius = int(speedometer_radius * 1.1)
 

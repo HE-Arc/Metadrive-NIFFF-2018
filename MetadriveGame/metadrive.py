@@ -340,7 +340,7 @@ else:
 screen = pygame.display.set_mode([screen_width, screen_height], flags)
 
 # Mouse
-#pygame.mouse.set_visible(False)
+# pygame.mouse.set_visible(False)
 
 # Clock
 clock = pygame.time.Clock()
@@ -601,23 +601,32 @@ while 1:
         time_in_level = (pygame.time.get_ticks()-level_start_time) / 1000.0
         level_remaining_time = current_level.duration - time_in_level
 
-        print(time_in_level, level_remaining_time)
-
         # Level has still more images AND hasnt run out of time
         if (index_view <= current_level.images_count
                 and (time_in_level <= current_level.duration)):
             last_index_view = index_view
         # End of the level
-        else:
-            transition_state = State.MENU
+        elif not transition_state:
+            print('------ FIN DU NIVEAU -------')
+            # Nobody is playing currently -> Back to menu
+            if (pygame.time.get_ticks()-last_activity
+               > inactivity_time_in_game):
+                transition_state = State.MENU
+                print('------ RETOUR AU MENU AFK -------')
+            # Somebody is playing -> Next level
+            else:
+                current_level = Level.level_list[
+                    (Level.level_list.index(current_level) + 1)
+                    % len(Level.level_list)
+                ]
+                transition_state = State.LEVEL
+                print('------ NIVEAU SUIVANT :', current_level.id, '-------')
 
         # Draw image
         screen.blit(
             current_level.images_cache[last_index_view],
             current_level.image_rect
         )
-
-        print('image en cours : ', last_index_view)
 
         # Calculating speeds
         if total_time > delta_time:
@@ -678,9 +687,10 @@ while 1:
             print('##### ', current_image_speed, ' #####')
 
         # REAMINING DISTANCE
+        remaining_dist = max(current_level.images_count - index_view, 0)
         text_dist_remaining = textOutline(
             visitor_font,
-            'DISTANCE: ' + str(current_level.images_count - index_view),
+            'Distance : ' + str(remaining_dist),
             PINK,
             (1, 1, 1)
         )
@@ -691,11 +701,10 @@ while 1:
         # REMAINING TIME
         # Level has nearly timed out
         if level_remaining_time <= 10 and level_remaining_time > 0:
-            print('REMAINING')
 
             text_time_remaining = textOutline(
                 visitor_font,
-                'REMAINING TIME: ' + str(int(level_remaining_time)),
+                'Time : ' + str(int(level_remaining_time)),
                 PINK,
                 (1, 1, 1)
             )
@@ -773,39 +782,39 @@ while 1:
         else:
             pass
 
-        # PROGRESS BAR
-        # Draw progress bar outline
-        pygame.draw.rect(screen, BLACK, progress_rect_outside, 5)
-
-        # Draw progress completion
-        completion = index_view/current_level.images_count
-
-        # One-block progression
-        # progress_rect_inside = Rect(
-        #     progress_rect_outside.left+progress_bar_inside_diff,
-        #     progress_rect_outside.top+progress_bar_inside_diff,
-        #     (progress_rect_outside.w-(2*progress_bar_inside_diff))*completion,
-        #     progress_rect_outside.h-(2*progress_bar_inside_diff)
+        # # PROGRESS BAR
+        # # Draw progress bar outline
+        # pygame.draw.rect(screen, BLACK, progress_rect_outside, 5)
+        #
+        # # Draw progress completion
+        # completion = index_view/current_level.images_count
+        #
+        # # One-block progression
+        # # progress_rect_inside = Rect(
+        # #     progress_rect_outside.left+progress_bar_inside_diff,
+        # #     progress_rect_outside.top+progress_bar_inside_diff,
+        # #     (progress_rect_outside.w-(2*progress_bar_inside_diff))*completion,
+        # #     progress_rect_outside.h-(2*progress_bar_inside_diff)
+        # # )
+        # # pygame.draw.rect(screen, BLACK, progress_rect_inside, 0)
+        #
+        # # Split progression
+        # split_completion = min(
+        #     int(completion/(1/progress_bar_splits)),
+        #     progress_bar_splits
         # )
-        # pygame.draw.rect(screen, BLACK, progress_rect_inside, 0)
-
-        # Split progression
-        split_completion = min(
-            int(completion/(1/progress_bar_splits)),
-            progress_bar_splits
-        )
-
-        # Draw each split inside the bar
-        for i in range(split_completion):
-            progress_rect_inside = Rect(
-                (progress_rect_outside.left
-                 + ((i+2)*progress_bar_inside_diff)
-                 + (i*split_width)),
-                progress_rect_outside.top + (2*progress_bar_inside_diff),
-                split_width,
-                inside_height
-            )
-            pygame.draw.rect(screen, PINK, progress_rect_inside, 0)
+        #
+        # # Draw each split inside the bar
+        # for i in range(split_completion):
+        #     progress_rect_inside = Rect(
+        #         (progress_rect_outside.left
+        #          + ((i+2)*progress_bar_inside_diff)
+        #          + (i*split_width)),
+        #         progress_rect_outside.top + (2*progress_bar_inside_diff),
+        #         split_width,
+        #         inside_height
+        #     )
+        #     pygame.draw.rect(screen, PINK, progress_rect_inside, 0)
 
         # SPEEDOMETER
         speedometer_main_needle_angle = get_angle_dial(
@@ -997,10 +1006,10 @@ while 1:
 
         # Demo mod
         if (pygame.time.get_ticks() - last_activity
-                > inactivity_time_before_demo):
+                > inactivity_time_in_menu) and not transition_state:
             # Random level
             current_level = random.choice(Level.level_list)
-            print('demo on level :', current_level.id)
+            print('DEMO SUR LEVEL :', current_level.id)
             transition_state = State.LEVEL
 
     # TODO : Checks not in every tick perhaps ?
