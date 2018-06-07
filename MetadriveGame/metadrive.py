@@ -132,15 +132,6 @@ def reset_game():
     level_start_time = 0
 
 
-def start_transition(surface):
-    # surface.fill(ABLACK)
-    pygame.gfxdraw.rectangle(
-        surface,
-        Rect(0, 0, screen_width, screen_height),
-        ABLACK
-    )
-
-
 # https://www.pygame.org/pcr/hollow_outline/index.php
 def textHollow(font, message, fontcolor):
     """ Create a surface containting a hollowed text in a specific font """
@@ -550,7 +541,7 @@ while 1:
             # DOWN Button
             if dp_output[down_arrow] or getattr(event, 'key', False) == K_m:
                 if state == State.LEVEL:
-                    pass
+                    transition_state = State.MENU
                 elif state == State.MENU:
                     # Next level
                     current_level = Level.level_list[
@@ -738,11 +729,11 @@ while 1:
             clue_interact_display = False
 
         # INSIDE CLUE AREA : Clue available to be activated
-        # TODO : Magick number
         if clue_interact_display:
             screen.blit(
                 text_interact_clue,
-                (screen_width/2 - (text_interact_clue.get_width()/2), 300)
+                (screen_width/2 - (text_interact_clue.get_width()/2),
+                 clue_indication_top)
             )
         # OUTSIDE CLUE AREA : Clue not available to be activated
         else:
@@ -769,14 +760,14 @@ while 1:
                     # print('SUBTITLE : ', subtitle_duration)
                     subtitle_start_time = pygame.time.get_ticks()
                     subtitle_text = textOutline(
-                        visitor_font, subtitle, PINK, (1, 1, 1)
+                        visitor_font, subtitle, WHITE, (1, 1, 1)
                     )
             # Current subtitle has to stay on screen a little more
-            # TODO : Magick number
             else:
                 screen.blit(
                     subtitle_text,
-                    (screen_width/2 - (subtitle_text.get_width()/2), 1200)
+                    (screen_width/2 - (subtitle_text.get_width()/2),
+                     subtitle_text_top)
                 )
         # NO CLUE CURRENTLY ENABLED : No subtitles are currently displayed
         else:
@@ -974,8 +965,7 @@ while 1:
 
     elif state == State.MENU:
         # Background
-        # TODO : Magick number
-        screen.fill((33, 183, 224))
+        screen.fill(MENU_BLUE)
         # Title
         screen.blit(
             text_main_title,
@@ -994,13 +984,13 @@ while 1:
             )
 
         text_select_level = textOutline(
-            visitor_font, '-----------', PINK, (1, 1, 1)
+            visitor_font, '--------', PINK, (1, 1, 1)
         )
 
         # Level selection
         screen.blit(
             text_select_level,
-            (screen_width/2 - (text_level.get_width()/2),
+            (screen_width/2 - (text_select_level.get_width()/2),
              650 + (current_level.id-1) * 400)
         )
 

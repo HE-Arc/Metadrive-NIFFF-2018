@@ -12,7 +12,7 @@ screen_height_default = 1920  # 640
 screen_width_default = 1080  # 640
 
 # Controls
-TEST_DANCEPAD = True
+TEST_DANCEPAD = False
 
 # Defaults
 up_arrow = 2
@@ -44,6 +44,7 @@ BLUE = (0, 0, 255)
 AGREEN = (0, 255, 0, 70)
 AWHITE = (255, 255, 255, 70)
 PINK = (235, 62, 149)  # (255, 72, 220)
+MENU_BLUE = (33, 183, 224)
 
 # HUD
 # Progress Bar
@@ -71,10 +72,12 @@ speedometer_outer_radius_marks = int(speedometer_radius * 1.1)
 speedometer_center_circle_radius = 10
 
 # Clues
+clue_indication_top = 300
 clue_range_min = 6./8
 clue_range_max = 1.0
 clue_radius = int(speedometer_radius * 0.9)
 
+subtitle_text_top = 1200
 subtitle_min_duration = 2
 subtitle_duration_by_char = 0.1
 
