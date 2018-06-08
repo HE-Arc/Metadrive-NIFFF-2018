@@ -45,6 +45,13 @@ AWHITE = (255, 255, 255, 70)
 PINK = (235, 62, 149)  # (255, 72, 220)
 MENU_BLUE = (33, 183, 224)
 
+# Speed
+MIN_KEY_SPEED = 0
+MAX_KEY_SPEED = 8
+
+MIN_IMAGE_SPEED = 0.3
+MAX_IMAGE_SPEED = 16
+
 # HUD
 
 # Speedometer

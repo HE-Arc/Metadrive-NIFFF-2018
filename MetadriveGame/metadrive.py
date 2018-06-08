@@ -3,6 +3,7 @@ import time
 import math
 import random
 import os
+import datetime
 
 import pygame
 import psutil
@@ -119,8 +120,8 @@ def reset_game():
     # Reset last image timer
     last_image_time = 0
     # Reset speeds
-    current_key_speed = min_key_speed
-    current_image_speed = mapped_current_key_speed = min_image_speed
+    current_key_speed = const.MIN_KEY_SPEED
+    current_image_speed = mapped_current_key_speed = const.MIN_IMAGE_SPEED
     key_pressed_count = 0
     # Reset clues in current level
     current_level.reset()
@@ -308,7 +309,7 @@ if pygame.joystick.get_count() > 0:
 
 
 # Events
-pygame.event.set_allowed([QUIT, KEYDOWN, KEYUP])
+pygame.event.set_allowed([QUIT, KEYDOWN])
 
 # Icon
 # icone = pygame.image.load(const.ICON_IMAGE)
@@ -318,7 +319,7 @@ pygame.event.set_allowed([QUIT, KEYDOWN, KEYUP])
 pygame.display.set_caption(const.WINDOW_TITLE)
 
 # Screen management
-flags = HWSURFACE | DOUBLEBUF
+flags = pygame.HWSURFACE | pygame.DOUBLEBUF
 
 if const.FULLSCREEN:
     infoDisplay = pygame.display.Info()
@@ -349,9 +350,24 @@ text_main_title = textOutline(
     visitor_font_main_title, 'METADRIVE', const.PINK, (1, 1, 1)
 )
 
+# class Game:
+#     """Class representing the game state"""
+#     def __init__(self):
+
+
 # General
 state = State.MENU
 shutdown_incoming = False
+last_activity = 0
+index_view = 1
+saved_index_view = index_view
+reset_loop = False
+
+# Keys
+btn_left_pressed = True
+btn_right_pressed = True
+
+# Transitions
 transition_index = 0
 transition_opacity_step = const.TRANSITION_OPACITY_DELTA
 transition_state = False
@@ -360,21 +376,16 @@ transition_state = False
 current_level = Level.level_list[0]
 next_level = Level.level_list[0]
 first_level_played = 0
+
+# Clues
 clue_interact_display = False
 current_clue = None
 clue_enabled = False
-# TODO : Subtitle class ?
+
+# Subtitles
 current_subtitle_duration = const.SUBTITLE_MIN_DURATION
 subtitle_start_time = 0
 subtitle_text = ''
-
-last_activity = 0
-index_view = 1
-saved_index_view = index_view
-btn_left_pressed = True
-btn_right_pressed = True
-
-reset_loop = False
 
 # Dancepad outputs (1 = enabled, 0 = disabled)
 dp_output = [0] * 10  # [0 for i in range(10)]
@@ -386,23 +397,20 @@ last_speed_calc = 0
 last_image_time = 0
 last_total_time = delta_time
 level_start_time = 0
+last_hardware_log = 0
 
 # Key Speed
 key_pressed_count = 0
-min_key_speed = 0
-max_key_speed = 8
-current_key_speed = min_key_speed  # key per second
-mapped_current_key_speed = min_key_speed
+current_key_speed = const.MIN_KEY_SPEED  # key per second
+mapped_current_key_speed = const.MIN_KEY_SPEED
 
 # Image Speed
-min_image_speed = 0.3
-max_image_speed = 16  # math.ceil(average_image_speed*2)
-current_image_speed = min_image_speed
-last_image_speed = min_image_speed
+current_image_speed = const.MIN_IMAGE_SPEED
+last_image_speed = const.MIN_IMAGE_SPEED
 image_speed_deceleration = 0
 
-print('Min image speed : ', min_image_speed)
-print('Max image speed : ', max_image_speed)
+print('Min image speed : ', const.MIN_IMAGE_SPEED)
+print('Max image speed : ', const.MAX_IMAGE_SPEED)
 
 # Speedometer
 speedometer_angle_min = 90 + (const.SPEEDOMETER_GLOBAL_ANGLE/2)
@@ -442,15 +450,17 @@ for i in range(const.SPEEDOMETER_NUMBER_OF_MARKS):
 # Clue area
 clue_min_angle = int(math.degrees(
     get_angle_dial(
-        const.SPEEDOMETER_GLOBAL_ANGLE, max_image_speed*const.CLUE_RANGE_MIN,
-        min_image_speed, max_image_speed)
+        const.SPEEDOMETER_GLOBAL_ANGLE,
+        const.MAX_IMAGE_SPEED*const.CLUE_RANGE_MIN,
+        const.MIN_IMAGE_SPEED, const.MAX_IMAGE_SPEED)
     )
 )
 
 clue_max_angle = int(math.degrees(
     get_angle_dial(
-        const.SPEEDOMETER_GLOBAL_ANGLE, max_image_speed*const.CLUE_RANGE_MAX,
-        min_image_speed, max_image_speed)
+        const.SPEEDOMETER_GLOBAL_ANGLE,
+        const.MAX_IMAGE_SPEED*const.CLUE_RANGE_MAX,
+        const.MIN_IMAGE_SPEED, const.MAX_IMAGE_SPEED)
     )
 )
 
@@ -560,7 +570,7 @@ while 1:
     # --------------------------------- LEVEL ---------------------------------
     # -------------------------------------------------------------------------
 
-    if state == State.LEVEL or state == State.DEMO:
+    if state in [State.LEVEL, State.DEMO]:
 
         if not level_start_time:
             time = pygame.time.get_ticks()
@@ -631,12 +641,13 @@ while 1:
             saved_index_view = index_view
 
             current_key_speed = key_pressed_count/total_time
-            if current_key_speed > max_key_speed:
-                current_key_speed = max_key_speed
+            if current_key_speed > const.MAX_KEY_SPEED:
+                current_key_speed = const.MAX_KEY_SPEED
 
             mapped_current_key_speed = map_range_to_range(
-                min_key_speed, max_key_speed, min_image_speed,
-                max_image_speed, current_key_speed
+                const.MIN_KEY_SPEED, const.MAX_KEY_SPEED,
+                const.MIN_IMAGE_SPEED, const.MAX_IMAGE_SPEED,
+                current_key_speed
             )
 
             # Speed to gain or loss in one second
@@ -660,14 +671,14 @@ while 1:
         if mapped_current_key_speed < current_image_speed:
             current_image_speed += (image_speed_deceleration
                                     * (elapsed/last_total_time))
-            if current_image_speed < min_image_speed:
-                current_image_speed = min_image_speed
+            if current_image_speed < const.MIN_IMAGE_SPEED:
+                current_image_speed = const.MIN_IMAGE_SPEED
         # Acceleration
         elif mapped_current_key_speed > current_image_speed:
             current_image_speed += (image_speed_deceleration
                                     * (elapsed/last_total_time))
-            if current_image_speed > max_image_speed:
-                current_image_speed = max_image_speed
+            if current_image_speed > const.MAX_IMAGE_SPEED:
+                current_image_speed = const.MAX_IMAGE_SPEED
         # Stable Speed
         else:
             current_image_speed = mapped_current_key_speed
@@ -780,7 +791,7 @@ while 1:
         # SPEEDOMETER
         speedometer_main_needle_angle = get_angle_dial(
             const.SPEEDOMETER_GLOBAL_ANGLE, current_image_speed,
-            min_image_speed, max_image_speed
+            const.MIN_IMAGE_SPEED, const.MAX_IMAGE_SPEED
         )
         speedometer_main_needle_end_x = (
             const.SPEEDOMETER_CENTER_X
@@ -800,7 +811,7 @@ while 1:
         speedometer_future_needle_angle = get_angle_dial(
             const.SPEEDOMETER_GLOBAL_ANGLE,
             mapped_current_key_speed,
-            min_image_speed, max_image_speed
+            const.MIN_IMAGE_SPEED, const.MAX_IMAGE_SPEED
         )
 
         # TODO : useful when future needle hidden ?
@@ -989,6 +1000,23 @@ while 1:
             os.system('shutdown -a')
             shutdown_incoming = False        # Draw transition
 
+    # Log CPU/RAM usage
+    if (not last_hardware_log
+            or pygame.time.get_ticks() - last_hardware_log > 60000):
+        last_hardware_log = pygame.time.get_ticks()
+
+        cpu_percent = psutil.cpu_percent()
+        ram_percent = psutil.virtual_memory().percent
+        now = str(datetime.datetime.now()).split('.')[0]
+
+        print('CPU : ', cpu_percent)
+        print('RAM : ', ram_percent)
+        print('Date :', now)
+
+        log_file = open('log.txt', 'a')
+        log_file.write(f'{now} | CPU : {cpu_percent} | RAM : {ram_percent}\n')
+        log_file.close()
+
     # Transition Management
     if transition_state:
 
@@ -1002,8 +1030,7 @@ while 1:
             print('------ GAME RESETED -------')
             state = transition_state
             # Next level
-            if (transition_state == State.LEVEL
-               or transition_state == State.DEMO):
+            if transition_state in [State.LEVEL, State.DEMO]:
                 current_level = next_level
 
         elif transition_index < 0:
