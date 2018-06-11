@@ -206,10 +206,9 @@ dp_output = [0] * 10  # [0 for i in range(10)]
 
 # Time
 total_time = 0
-delta_time = 1
 last_speed_calc = 0
 last_image_time = 0
-last_total_time = delta_time
+last_total_time = const.DELTA_TIME
 level_start_time = 0
 last_hardware_log = 0
 
@@ -221,7 +220,7 @@ mapped_current_key_speed = const.MIN_KEY_SPEED
 # Image Speed
 current_image_speed = const.MIN_IMAGE_SPEED
 last_image_speed = const.MIN_IMAGE_SPEED
-image_speed_deceleration = 0
+image_speed_diff = 0
 
 print('Min image speed : ', const.MIN_IMAGE_SPEED)
 print('Max image speed : ', const.MAX_IMAGE_SPEED)
@@ -393,25 +392,28 @@ while 1:
         )
 
         # Calculating speeds
-        if total_time > delta_time:
+        if total_time > const.DELTA_TIME:
 
             print('real speed : ', (index_view - saved_index_view)/total_time)
             saved_index_view = index_view
 
             current_key_speed = key_pressed_count/total_time
+            print('current_key_speed 1 :', current_key_speed)
             if current_key_speed > const.MAX_KEY_SPEED:
                 current_key_speed = const.MAX_KEY_SPEED
+            print('current_key_speed 2 :', current_key_speed)
 
-            mapped_current_key_speed = map_range_to_range(
+            mapped_current_key_speed = map_key_speed_to_image_speed(
                 const.MIN_KEY_SPEED, const.MAX_KEY_SPEED,
                 const.MIN_IMAGE_SPEED, const.MAX_IMAGE_SPEED,
                 current_key_speed
             )
 
-            # Speed to gain or loss in one second
-            image_speed_deceleration = ((mapped_current_key_speed
-                                         - current_image_speed)
-                                        / total_time)
+            print('mapped_current_key_speed : ', mapped_current_key_speed)
+            print('current_image_speed : ', current_image_speed)
+
+            # Speed to gain or loss
+            image_speed_diff = mapped_current_key_speed - current_image_speed
 
             # Deceleration
             if mapped_current_key_speed < current_image_speed:
@@ -421,25 +423,29 @@ while 1:
 
             last_total_time = total_time
 
-            # print('acceleration :', image_speed_deceleration)
+            print('speed diff :', image_speed_diff)
 
             reset_loop = True
 
+        acceleration = 0
+
+        # Accelereation
+        if image_speed_diff > 0:
+            acceleration = const.ACCELERATION_POWER
         # Deceleration
-        if mapped_current_key_speed < current_image_speed:
-            current_image_speed += (image_speed_deceleration
-                                    * (elapsed/last_total_time))
-            if current_image_speed < const.MIN_IMAGE_SPEED:
-                current_image_speed = const.MIN_IMAGE_SPEED
-        # Acceleration
-        elif mapped_current_key_speed > current_image_speed:
-            current_image_speed += (image_speed_deceleration
-                                    * (elapsed/last_total_time))
+        elif image_speed_diff < 0:
+            acceleration = const.DECELERATION_POWER
+
+        if image_speed_diff:
+            current_image_speed += (
+                acceleration
+                * (elapsed/(last_total_time/const.DELTA_TIME))
+            )
+            # Fixes the limits
             if current_image_speed > const.MAX_IMAGE_SPEED:
                 current_image_speed = const.MAX_IMAGE_SPEED
-        # Stable Speed
-        else:
-            current_image_speed = mapped_current_key_speed
+            elif current_image_speed < const.MIN_IMAGE_SPEED:
+                current_image_speed = const.MIN_IMAGE_SPEED
 
         # Reset Loop
         if reset_loop:
@@ -448,8 +454,8 @@ while 1:
             last_speed_calc = 0
             key_pressed_count = 0
 
-            # print('===== ', current_key_speed, ' =====')
-            # print('##### ', current_image_speed, ' #####')
+            print('===== ', current_key_speed, ' =====')
+            print('##### ', current_image_speed, ' #####')
 
         # DEMO MODE TEXT
         # TODO : MagickNumber
@@ -514,7 +520,6 @@ while 1:
 
         # CLUE ENABLED : A clue has been enabled
         if current_clue:
-            print('CLUE IS ENABLED')
             # Checks subtitles duration
             if (((pygame.time.get_ticks() - subtitle_start_time)/1000.0)
                > current_subtitle_duration):
@@ -539,7 +544,6 @@ while 1:
                     )
             # Current subtitle has to stay on screen a little more
             else:
-                print('DISPLAYING SUBTITLE')
                 screen.blit(
                     subtitle_text,
                     (screen_width/2 - (subtitle_text.get_width()/2),

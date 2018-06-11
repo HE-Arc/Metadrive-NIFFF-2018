@@ -4,7 +4,7 @@ import math
 
 from utils import *
 
-DEBUG = False
+DEBUG = True
 
 # Main loop tick rate
 TICK_RATE = 30  # 30 tick per seconds
@@ -31,6 +31,9 @@ if TEST_DANCEPAD:
 INACTIVITY_TIME_IN_MENU = 30000  # in ms
 INACTIVITY_TIME_IN_GAME = 10000  # in ms
 FULLSCREEN = False
+DELTA_TIME = 0.3  # in seconds
+DECELERATION_POWER = -7  # Slow down speed by N images per second
+ACCELERATION_POWER = 4  # Speed goes up by N images per second
 
 # Icon and window title
 ICON_IMAGE = "images/"
@@ -52,7 +55,7 @@ MIN_KEY_SPEED = 0
 MAX_KEY_SPEED = 8
 
 MIN_IMAGE_SPEED = 0.3
-MAX_IMAGE_SPEED = 16
+MAX_IMAGE_SPEED = 20
 
 # HUD
 
