@@ -4,10 +4,8 @@ import math
 import random
 import os
 import datetime
-
 import pygame
 import psutil
-
 import const
 
 from enum import Enum
@@ -16,51 +14,13 @@ from pygame.gfxdraw import *
 from pygame.locals import *
 from lxml import etree
 
+from utils import *
+from level import *
+from clue import *
+
 # --------------------------------------------------------------------------
 # ------------------------------- METHODS ----------------------------------
 # --------------------------------------------------------------------------
-
-
-def map_key_speed_to_image_speed(
-        min_key_speed,
-        max_key_speed,
-        min_image_speed,
-        max_image_speed,
-        current_key_speed):
-    """ Convert a key speed in a range to an image speed also in a range """
-    slow_image_speed_percent = 0.25
-    slow_key_speed_percent = 0.5
-    real_delta_image_speed = max_image_speed - min_image_speed
-    slow_delta_image_speed = real_delta_image_speed * slow_image_speed_percent
-    fast_delta_image_speed = (real_delta_image_speed
-                              * (1-slow_image_speed_percent))
-
-    real_delta_key_speed = max_key_speed - min_key_speed
-    ratio = current_key_speed / real_delta_key_speed
-
-    if ratio <= slow_key_speed_percent:
-
-        ratio = (current_key_speed
-                 / (real_delta_key_speed * slow_key_speed_percent))
-
-        current_image_speed = ((ratio * slow_delta_image_speed)
-                               + min_image_speed)
-    else:
-        ratio = ((current_key_speed
-                  - (real_delta_key_speed * slow_key_speed_percent))
-                 / (real_delta_key_speed * (1-slow_key_speed_percent)))
-
-        current_image_speed = ((ratio * fast_delta_image_speed)
-                               + min_image_speed
-                               + slow_delta_image_speed)
-    return current_image_speed
-
-
-def map_range_to_range(min_a, max_a, min_b, max_b, value_a):
-    """ Convert a value in a range to another value also in a range """
-    ratio = value_a / (max_a - min_a)
-    value_b = ratio * (max_b - min_b) + min_b
-    return value_b
 
 
 def get_dancepad_output():
@@ -73,46 +33,10 @@ def get_dancepad_output():
     return [j.get_button(i) if i < n else 0 for i in range(max(10, n))]
 
 
-def get_angle_dial(global_angle, current_val, min_val, max_val):
-    """
-    Convert a speed in a range into an angle (radians) inside an angle range
-    """
-    # 1.5 * pi = 270°
-    return (1.5*math.pi
-            - math.radians((360-global_angle)/2)
-            - ((current_val - min_val) / (max_val - min_val)
-               * math.radians(global_angle)))
-
-
-def calc_points_aa_filled_pie(center_x, center_y, radius, angle_a, angle_b):
-    """
-    Return a list of points representing a pie with the given parameters
-    """
-    # Start list of polygon points
-    p = [(center_x, center_y)]
-
-    # Get points on arc
-    for angle in range(angle_a, angle_b):
-        x = center_x + int(radius * math.cos(math.radians(angle)))
-        y = center_y - int(radius * math.sin(math.radians(angle)))
-        p.append((x, y))
-
-    return p
-
-
-def draw_aa_filled_pie(surface, points, color):
-    """ Draw a filled antialiazed pie from a list of points """
-
-    pygame.gfxdraw.filled_polygon(surface, points, color)
-    pygame.gfxdraw.aapolygon(surface, points, color)
-    # pygame.gfxdraw.arc(surface, center_x, center_y, radius, -angle_b,
-    #                    -angle_a, color)
-
-
 def reset_game():
     """ Reset the global variable after a level has ended """
     global index_view, last_image_time, current_key_speed, current_image_speed
-    global clue_enabled, current_clue, last_activity, level_start_time
+    global current_clue, last_activity, level_start_time
     global key_pressed_count, mapped_current_key_speed
 
     # Back to first image
@@ -125,44 +49,11 @@ def reset_game():
     key_pressed_count = 0
     # Reset clues in current level
     current_level.reset()
-    clue_enabled = False
     current_clue = None
     # Reset inactivity time
     last_activity = pygame.time.get_ticks()
     # Reset level time
     level_start_time = 0
-
-
-# https://www.pygame.org/pcr/hollow_outline/index.php
-def textHollow(font, message, fontcolor):
-    """ Create a surface containting a hollowed text in a specific font """
-    notcolor = [c ^ 0xFF for c in fontcolor]
-    base = font.render(message, 0, fontcolor, notcolor)
-    size = base.get_width() + 2, base.get_height() + 2
-    img = pygame.Surface(size, 16)
-    img.fill(notcolor)
-    base.set_colorkey(0)
-    index = 4
-    img.blit(base, (0, 0))
-    img.blit(base, (index, 0))
-    img.blit(base, (0, index))
-    img.blit(base, (index, index))
-    base.set_colorkey(0)
-    base.set_palette_at(1, notcolor)
-    img.blit(base, (1, 1))
-    img.set_colorkey(notcolor)
-    return img
-
-
-def textOutline(font, message, fontcolor, outlinecolor):
-    """ Create a surface containing an outlined text in a specific font """
-    base = font.render(message, 0, fontcolor)
-    outline = textHollow(font, message, outlinecolor)
-    img = pygame.Surface(outline.get_size(), 16)
-    img.blit(base, (1, 1))
-    img.blit(outline, (0, 0))
-    img.set_colorkey(0)
-    return img
 
 # --------------------------------------------------------------------------
 # ------------------------------- CLASSES ----------------------------------
@@ -174,85 +65,6 @@ class State(Enum):
     MENU = 1
     LEVEL = 2
     DEMO = 3
-
-
-class Level:
-    """Class representing a level"""
-    id = 1
-    level_list = []
-
-    def __init__(self, images_count, duration, path):
-        # Properties
-        self.id = Level.id
-        self.images_count = images_count
-        self.duration = duration
-        self.path = path
-        self.images_cache = []
-        self.images_cache.append('empty')
-        self.new_clue_list = []
-        self.old_clue_list = []
-
-        # Adding this level to the level list
-        Level.level_list.append(self)
-
-        # Caching specified images
-        self.load_images(self.path)
-
-        # Rect for one image
-        self.image_rect = self.images_cache[1].get_rect()
-
-        # Increment static value for next level
-        Level.id += 1
-
-    def add_clue(self, clue):
-        """ Adds a clue to the clue list """
-        self.new_clue_list.append(clue)
-
-    def get_random_clue(self):
-        """ Returns a random clue from the clue list """
-        random.shuffle(self.new_clue_list)
-        clue = None
-        # Check if list isnt empty
-        if self.new_clue_list:
-            clue = self.new_clue_list.pop()
-            self.old_clue_list.append(clue)
-        return clue
-
-    def reset(self):
-        """ Resets the level to initial state to be able to play it again """
-        self.new_clue_list = self.new_clue_list + self.old_clue_list
-        for clue in self.new_clue_list:
-            clue.reset()
-
-    def load_images(self, path):
-        """ Load given images into a list """
-        for i in range(self.images_count):
-            index = i + 1
-            print('Image ', index, ' added to level ', self.id)
-            self.images_cache.append(
-                pygame.image.load(f'maps/{self.path}/gsv_{index}.jpg'))
-
-
-class Clue:
-    """Class containing one set of subtitles for one level"""
-    def __init__(self):
-        self.subtitle_list = []
-        self.index = 0
-
-    def get_next_subtitle(self):
-        """ Returns the next subtitle or None if there's no more """
-        # If there is a next subtitle
-        if(len(self.subtitle_list) - 1 >= self.index):
-            subtitle = self.subtitle_list[self.index]
-            self.index += 1
-            return subtitle
-        # No more subtitle in this clue
-        else:
-            return None
-
-    def reset(self):
-        """ Resets the clue progression in its subtitles """
-        self.index = 0
 
 # --------------------------------------------------------------------------
 # ------------------------- LEVELS & CLUES INIT ----------------------------
@@ -342,12 +154,15 @@ clock = pygame.time.Clock()
 font_path = "./fonts/terminal-grotesque.ttf"
 visitor_font = pygame.font.Font(font_path, 45)
 visitor_font_main_title = pygame.font.Font(font_path, 90)
+visitor_font_demo = pygame.font.Font(font_path, 70)
 
-text_interact_clue = textOutline(
-    visitor_font, 'CLUE ( Press UP key )', const.PINK, (1, 1, 1)
-)
+# Main title
 text_main_title = textOutline(
     visitor_font_main_title, 'METADRIVE', const.PINK, (1, 1, 1)
+)
+# Demo mode
+text_demo = textOutline(
+    visitor_font_main_title, 'PRESS ANY KEY TO START', const.PINK, (1, 1, 1)
 )
 
 # class Game:
@@ -380,7 +195,6 @@ first_level_played = 0
 # Clues
 clue_interact_display = False
 current_clue = None
-clue_enabled = False
 
 # Subtitles
 current_subtitle_duration = const.SUBTITLE_MIN_DURATION
@@ -413,66 +227,12 @@ print('Min image speed : ', const.MIN_IMAGE_SPEED)
 print('Max image speed : ', const.MAX_IMAGE_SPEED)
 
 # Speedometer
-speedometer_angle_min = 90 + (const.SPEEDOMETER_GLOBAL_ANGLE/2)
-speedometer_angle_max = 90 - (const.SPEEDOMETER_GLOBAL_ANGLE/2)
+speedometer_main_needle_angle_degrees = const.SPEEDOMETER_ANGLE_MIN
 
-speedometer_main_needle_angle_degrees = speedometer_angle_min
-
-large_dial_bg_points = calc_points_aa_filled_pie(
-    const.SPEEDOMETER_CENTER_X,
-    const.SPEEDOMETER_CENTER_Y,
-    const.SPEEDOMETER_RADIUS,
-    int(90 - (const.SPEEDOMETER_GLOBAL_ANGLE/2)),
-    int(90 + (const.SPEEDOMETER_GLOBAL_ANGLE/2))
+print(
+    'Min angle clue : ', const.CLUE_MIN_ANGLE,
+    'Max angle clue : ', const.CLUE_MAX_ANGLE
 )
-
-# Speed Marks
-delta_angle_mark = (const.SPEEDOMETER_GLOBAL_ANGLE
-                    / (const.SPEEDOMETER_NUMBER_OF_MARKS-1))
-marks = []
-for i in range(const.SPEEDOMETER_NUMBER_OF_MARKS):
-    angle = math.radians(
-        270 - ((360 - const.SPEEDOMETER_GLOBAL_ANGLE) / 2)
-        - (i*delta_angle_mark)
-    )
-    mark_start_x = (const.SPEEDOMETER_CENTER_X
-                    + math.cos(angle)*const.SPEEDOMETER_INNER_RADIUS_MARKS)
-    mark_start_y = (const.SPEEDOMETER_CENTER_Y
-                    - math.sin(angle)*const.SPEEDOMETER_INNER_RADIUS_MARKS)
-
-    mark_end_x = (const.SPEEDOMETER_CENTER_X
-                  + math.cos(angle)*const.SPEEDOMETER_OUTER_RADIUS_MARKS)
-    mark_end_y = (const.SPEEDOMETER_CENTER_Y
-                  - math.sin(angle)*const.SPEEDOMETER_OUTER_RADIUS_MARKS)
-
-    marks.append([(mark_start_x, mark_start_y), (mark_end_x, mark_end_y)])
-
-# Clue area
-clue_min_angle = int(math.degrees(
-    get_angle_dial(
-        const.SPEEDOMETER_GLOBAL_ANGLE,
-        const.MAX_IMAGE_SPEED*const.CLUE_RANGE_MIN,
-        const.MIN_IMAGE_SPEED, const.MAX_IMAGE_SPEED)
-    )
-)
-
-clue_max_angle = int(math.degrees(
-    get_angle_dial(
-        const.SPEEDOMETER_GLOBAL_ANGLE,
-        const.MAX_IMAGE_SPEED*const.CLUE_RANGE_MAX,
-        const.MIN_IMAGE_SPEED, const.MAX_IMAGE_SPEED)
-    )
-)
-
-small_dial_bg_points = calc_points_aa_filled_pie(
-    const.SPEEDOMETER_CENTER_X,
-    const.SPEEDOMETER_CENTER_Y,
-    const.CLUE_RADIUS,
-    clue_max_angle,
-    clue_min_angle
-)
-
-print('Min angle clue : ', clue_min_angle, 'Max angle clue : ', clue_max_angle)
 
 # --------------------------------------------------------------------------
 # ------------------------------ MAIN LOOP ---------------------------------
@@ -534,9 +294,7 @@ while 1:
             if (dp_output[const.UP_ARROW]
                     or getattr(event, 'key', False) == K_o):
                 if state == State.LEVEL:
-                    if clue_interact_display:
-                        clue_enabled = True
-                        clue_interact_display = False
+                    pass
                 elif state == State.MENU:
                     # Previous level
                     next_level = Level.level_list[
@@ -690,8 +448,16 @@ while 1:
             last_speed_calc = 0
             key_pressed_count = 0
 
-            print('===== ', current_key_speed, ' =====')
-            print('##### ', current_image_speed, ' #####')
+            # print('===== ', current_key_speed, ' =====')
+            # print('##### ', current_image_speed, ' #####')
+
+        # DEMO MODE TEXT
+        # TODO : MagickNumber
+        if state == State.DEMO:
+            screen.blit(
+                text_demo,
+                (screen_width/2 - (text_demo.get_width()/2), 1400)
+            )
 
         # REAMINING DISTANCE
         remaining_dist = max(current_level.images_count - index_view, 0)
@@ -722,53 +488,47 @@ while 1:
 
         # CLUES
 
+        # INSIDE CLUE AREA
         # Checks if the main speed needle is inside the clue area
-        if (speedometer_main_needle_angle_degrees >= clue_max_angle
-                and speedometer_main_needle_angle_degrees <= clue_min_angle):
-            # Check if there is no clue enabled currently
-            if not clue_enabled:
-                # Check if a clue has already been loaded
-                if current_clue:
-                    clue_interact_display = True
-                # A new clue has to be loaded
-                else:
-                    clue = current_level.get_random_clue()
-                    # Check if there's a clue left inside this level
-                    if clue:
-                        clue_interact_display = True
-                        current_clue = clue
-                    # No clue left
-                    else:
-                        clue_interact_display = False
-        # Outside the clue area
-        else:
-            clue_interact_display = False
+        if (speedometer_main_needle_angle_degrees >= const.CLUE_MAX_ANGLE
+           and speedometer_main_needle_angle_degrees <= const.CLUE_MIN_ANGLE):
 
-        # INSIDE CLUE AREA : Clue available to be activated
-        if clue_interact_display:
-            screen.blit(
-                text_interact_clue,
-                (screen_width/2 - (text_interact_clue.get_width()/2),
-                 const.CLUE_INDICATION_TOP)
-            )
-        # OUTSIDE CLUE AREA : Clue not available to be activated
+            # NO CLUE CURRENTLY ENABLED : No subtitles are currently displayed
+            if not current_clue:
+                print('CLUE HAS TO BE LOAD')
+                clue = current_level.get_random_clue()
+                # Check if there's a clue left inside this level
+                if clue:
+                    current_clue = clue
+                    print('CLUE ENABLED')
+                # No clue left
+                else:
+                    pass
+            # CLUE ENABLE
+            else:
+                # NOTE : paste clue enabled section here to see second version
+                pass
+        # OUTSIDE THE CLUE AREA
         else:
             pass
 
         # CLUE ENABLED : A clue has been enabled
-        if clue_enabled:
+        if current_clue:
+            print('CLUE IS ENABLED')
             # Checks subtitles duration
             if (((pygame.time.get_ticks() - subtitle_start_time)/1000.0)
                > current_subtitle_duration):
+                print('SUBTITLE HAS TO BE LOAD')
                 # Fetch the next subtitle for this clue
                 subtitle = current_clue.get_next_subtitle()
 
                 # This clue has no more subtitle
                 if not subtitle:
-                    clue_enabled = False
+                    print('NO MORE SUBTITLE')
                     current_clue = None
                 # Prepare the subtitle to be displayed
                 else:
+                    print('NEW SUBTITLE LOADED')
                     current_subtitle_duration = max(
                         const.SUBTITLE_MIN_DURATION,
                         len(subtitle) * const.SUBTITLE_DURATION_BY_CHAR
@@ -779,14 +539,12 @@ while 1:
                     )
             # Current subtitle has to stay on screen a little more
             else:
+                print('DISPLAYING SUBTITLE')
                 screen.blit(
                     subtitle_text,
                     (screen_width/2 - (subtitle_text.get_width()/2),
                      const.SUBTITLE_TEXT_TOP)
                 )
-        # NO CLUE CURRENTLY ENABLED : No subtitles are currently displayed
-        else:
-            pass
 
         # SPEEDOMETER
         speedometer_main_needle_angle = get_angle_dial(
@@ -814,17 +572,6 @@ while 1:
             const.MIN_IMAGE_SPEED, const.MAX_IMAGE_SPEED
         )
 
-        # TODO : useful when future needle hidden ?
-        speedometer_future_needle_end_x = (
-            const.SPEEDOMETER_CENTER_X
-            + (math.cos(speedometer_future_needle_angle)
-               * const.SPEEDOMETER_FUTURE_NEEDLE_LENGHT)
-        )
-        speedometer_future_needle_end_y = (
-            const.SPEEDOMETER_CENTER_Y
-            - (math.sin(speedometer_future_needle_angle)
-               * const.SPEEDOMETER_FUTURE_NEEDLE_LENGHT))
-
         # Dial
         # Larger background
         pygame.gfxdraw.filled_circle(
@@ -837,14 +584,14 @@ while 1:
             const.AWHITE
         )
         # Smaller background
-        draw_aa_filled_pie(screen, large_dial_bg_points, const.ABLACK)
+        draw_aa_filled_pie(screen, const.LARGE_DIAL_BG_POINTS, const.ABLACK)
 
         # Speed Marks
-        for mark in marks:
+        for mark in const.MARKS_POINTS:
             pygame.draw.line(screen, const.WHITE, mark[0], mark[1], 4)
 
         # Clue area
-        draw_aa_filled_pie(screen, small_dial_bg_points, const.PINK)
+        draw_aa_filled_pie(screen, const.CLUE_AREA_POINTS, const.PINK)
 
         # Display Acceleration and Deceleration between needles
 
@@ -862,6 +609,17 @@ while 1:
         )
 
         if const.DEBUG:
+
+            speedometer_future_needle_end_x = (
+                const.SPEEDOMETER_CENTER_X
+                + (math.cos(speedometer_future_needle_angle)
+                   * const.SPEEDOMETER_FUTURE_NEEDLE_LENGHT)
+            )
+            speedometer_future_needle_end_y = (
+                const.SPEEDOMETER_CENTER_Y
+                - (math.sin(speedometer_future_needle_angle)
+                   * const.SPEEDOMETER_FUTURE_NEEDLE_LENGHT))
+
             if(delta_needle < 0):
                 # Acceleration
                 pygame.gfxdraw.arc(
@@ -1038,11 +796,25 @@ while 1:
             transition_state = False
             transition_opacity_step = -transition_opacity_step
 
+        # WHITE WALL
         pygame.gfxdraw.box(
             screen,
             current_level.image_rect,
             (255, 255, 255, transition_index)
         )
+
+        # LEVEL TEXT
+        if transition_state == State.LEVEL:
+            text_level = textOutline(
+                visitor_font_demo,
+                'LEVEL ' + str(next_level.id),
+                const.PINK, (1, 1, 1)
+            )
+            # TODO : magick number
+            screen.blit(
+                text_level,
+                (screen_width/2 - (text_level.get_width()/2), 800)
+            )
 
     # Updates screen
     pygame.display.flip()

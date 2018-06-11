@@ -1,6 +1,8 @@
 """Constants of Metadrive game"""
 
-# TODO : All capital leters ?
+import math
+
+from utils import *
 
 DEBUG = False
 
@@ -68,11 +70,41 @@ SPEEDOMETER_GLOBAL_ANGLE = 260
 SPEEDOMETER_NUMBER_OF_MARKS = 9
 SPEEDOMETER_INNER_RADIUS_MARKS = int(SPEEDOMETER_RADIUS * 0.9)
 SPEEDOMETER_OUTER_RADIUS_MARKS = int(SPEEDOMETER_RADIUS * 1.1)
+DELTA_ANGLE_MARK = (SPEEDOMETER_GLOBAL_ANGLE
+                    / (SPEEDOMETER_NUMBER_OF_MARKS-1))
 
 SPEEDOMETER_CENTER_CIRCLE_RADIUS = 10
 
+SPEEDOMETER_ANGLE_MIN = 90 + (SPEEDOMETER_GLOBAL_ANGLE/2)
+SPEEDOMETER_ANGLE_MAX = 90 - (SPEEDOMETER_GLOBAL_ANGLE/2)
+
+LARGE_DIAL_BG_POINTS = calc_points_aa_filled_pie(
+    SPEEDOMETER_CENTER_X,
+    SPEEDOMETER_CENTER_Y,
+    SPEEDOMETER_RADIUS,
+    int(SPEEDOMETER_ANGLE_MAX),
+    int(SPEEDOMETER_ANGLE_MIN)
+)
+
+MARKS_POINTS = []
+for i in range(SPEEDOMETER_NUMBER_OF_MARKS):
+    angle = math.radians(
+        270 - ((360 - SPEEDOMETER_GLOBAL_ANGLE) / 2)
+        - (i*DELTA_ANGLE_MARK)
+    )
+    mark_start_x = (SPEEDOMETER_CENTER_X
+                    + math.cos(angle)*SPEEDOMETER_INNER_RADIUS_MARKS)
+    mark_start_y = (SPEEDOMETER_CENTER_Y
+                    - math.sin(angle)*SPEEDOMETER_INNER_RADIUS_MARKS)
+    mark_end_x = (SPEEDOMETER_CENTER_X
+                  + math.cos(angle)*SPEEDOMETER_OUTER_RADIUS_MARKS)
+    mark_end_y = (SPEEDOMETER_CENTER_Y
+                  - math.sin(angle)*SPEEDOMETER_OUTER_RADIUS_MARKS)
+    MARKS_POINTS.append(
+        [(mark_start_x, mark_start_y), (mark_end_x, mark_end_y)]
+    )
+
 # Clues
-CLUE_INDICATION_TOP = 300
 CLUE_RANGE_MIN = 6./8  # Start Percent of speedometer global angle
 CLUE_RANGE_MAX = 1.0  # End Percent of speedometer global angle
 CLUE_RADIUS = int(SPEEDOMETER_RADIUS * 0.9)
@@ -80,6 +112,30 @@ CLUE_RADIUS = int(SPEEDOMETER_RADIUS * 0.9)
 SUBTITLE_TEXT_TOP = 1200
 SUBTITLE_MIN_DURATION = 2
 SUBTITLE_DURATION_BY_CHAR = 0.1
+
+CLUE_MIN_ANGLE = int(math.degrees(
+    get_angle_dial(
+        SPEEDOMETER_GLOBAL_ANGLE,
+        MAX_IMAGE_SPEED*CLUE_RANGE_MIN,
+        MIN_IMAGE_SPEED, MAX_IMAGE_SPEED)
+    )
+)
+
+CLUE_MAX_ANGLE = int(math.degrees(
+    get_angle_dial(
+        SPEEDOMETER_GLOBAL_ANGLE,
+        MAX_IMAGE_SPEED*CLUE_RANGE_MAX,
+        MIN_IMAGE_SPEED, MAX_IMAGE_SPEED)
+    )
+)
+
+CLUE_AREA_POINTS = calc_points_aa_filled_pie(
+    SPEEDOMETER_CENTER_X,
+    SPEEDOMETER_CENTER_Y,
+    CLUE_RADIUS,
+    CLUE_MAX_ANGLE,
+    CLUE_MIN_ANGLE
+)
 
 # Transition
 TRANSITION_OPACITY_DELTA = 10
