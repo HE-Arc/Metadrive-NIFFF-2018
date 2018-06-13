@@ -28,7 +28,7 @@ if TEST_DANCEPAD:
     RIGHT_ARROW = 3
 
 # Parameters
-INACTIVITY_TIME_IN_MENU = 30000  # in ms
+INACTIVITY_TIME_IN_MENU = 5000  # in ms
 INACTIVITY_TIME_IN_GAME = 10000  # in ms
 FULLSCREEN = False
 DELTA_TIME = 0.3  # in seconds
@@ -142,3 +142,6 @@ CLUE_AREA_POINTS = calc_points_aa_filled_pie(
 
 # Transition
 TRANSITION_OPACITY_DELTA = 10
+
+# Demo
+TEXT_DEMO_TOP = 1400

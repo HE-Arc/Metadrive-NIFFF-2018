@@ -162,12 +162,8 @@ text_main_title = textOutline(
 )
 # Demo mode
 text_demo = textOutline(
-    visitor_font_main_title, 'PRESS ANY KEY TO START', const.PINK, (1, 1, 1)
+    visitor_font_demo, 'PRESS ANY KEY TO START', const.PINK, (1, 1, 1)
 )
-
-# class Game:
-#     """Class representing the game state"""
-#     def __init__(self):
 
 
 # General
@@ -186,6 +182,9 @@ btn_right_pressed = True
 transition_index = 0
 transition_opacity_step = const.TRANSITION_OPACITY_DELTA
 transition_state = False
+
+# Demo
+demo_text_pos = (screen_width/2) - (text_demo.get_width()/2)
 
 # Level
 current_level = Level.level_list[0]
@@ -460,10 +459,28 @@ while 1:
         # DEMO MODE TEXT
         # TODO : MagickNumber
         if state == State.DEMO:
+
+            # Text is cropped by the right side of the screen
+            if (demo_text_pos + text_demo.get_width() >= screen_width
+                    and demo_text_pos <= screen_width):
+                # Displays the cropped part of the text, but from left side
+                screen.blit(
+                    text_demo,
+                    (-(screen_width-demo_text_pos), const.TEXT_DEMO_TOP)
+                )
+            # Text is completely cropped
+            elif demo_text_pos > screen_width:
+                # Reset text position
+                demo_text_pos = 0
+
+            # Displays the text
             screen.blit(
                 text_demo,
-                (screen_width/2 - (text_demo.get_width()/2), 1400)
+                (demo_text_pos, const.TEXT_DEMO_TOP)
             )
+
+            # Moves slightly the text to the right
+            demo_text_pos += 3
 
         # REAMINING DISTANCE
         remaining_dist = max(current_level.images_count - index_view, 0)
@@ -757,9 +774,9 @@ while 1:
             print('PC will be shutdown if the power remain unplugged'
                   + ' in the next 60 seconds')
             shutdown_incoming = True
-            os.system('shutdown -s -t 60')
+            # os.system('shutdown -s -t 60')
         elif psutil.sensors_battery().power_plugged and shutdown_incoming:
-            os.system('shutdown -a')
+            # os.system('shutdown -a')
             shutdown_incoming = False        # Draw transition
 
     # Log CPU/RAM usage
