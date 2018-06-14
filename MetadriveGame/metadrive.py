@@ -9,6 +9,7 @@ import psutil
 import const
 
 from enum import Enum
+from collections import deque
 
 from pygame.gfxdraw import *
 from pygame.locals import *
@@ -37,7 +38,8 @@ def reset_game():
     """ Reset the global variable after a level has ended """
     global index_view, last_image_time, current_key_speed, current_image_speed
     global current_clue, last_activity, level_start_time
-    global key_pressed_count, mapped_current_key_speed
+    global key_pressed_count, mapped_current_key_speed, state, max_key_speed
+    global image_speed_history
 
     # Back to first image
     index_view = 1
@@ -54,6 +56,11 @@ def reset_game():
     last_activity = pygame.time.get_ticks()
     # Reset level time
     level_start_time = 0
+
+    # Reset difficulty when back in menu
+    if state == State.MENU:
+        max_key_speed = const.DEFAULT_MAX_KEY_SPEED
+        image_speed_history = deque([0] * len(image_speed_history))
 
 # --------------------------------------------------------------------------
 # ------------------------------- CLASSES ----------------------------------
@@ -184,7 +191,7 @@ transition_opacity_step = const.TRANSITION_OPACITY_DELTA
 transition_state = False
 
 # Demo
-demo_text_pos = (screen_width/2) - (text_demo.get_width()/2)
+text_demo_pos = (screen_width/2) - (text_demo.get_width()/2)
 
 # Level
 current_level = Level.level_list[0]
@@ -215,11 +222,16 @@ last_hardware_log = 0
 key_pressed_count = 0
 current_key_speed = const.MIN_KEY_SPEED  # key per second
 mapped_current_key_speed = const.MIN_KEY_SPEED
+max_key_speed = const.DEFAULT_MAX_KEY_SPEED
 
 # Image Speed
 current_image_speed = const.MIN_IMAGE_SPEED
 last_image_speed = const.MIN_IMAGE_SPEED
 image_speed_diff = 0
+
+# Sized to contains 15s of image speed data
+image_speed_history = deque([0] *
+                            int(const.TIME_TO_UPGRADE_DIFF/const.DELTA_TIME))
 
 print('Min image speed : ', const.MIN_IMAGE_SPEED)
 print('Max image speed : ', const.MAX_IMAGE_SPEED)
@@ -397,19 +409,14 @@ while 1:
             saved_index_view = index_view
 
             current_key_speed = key_pressed_count/total_time
-            print('current_key_speed 1 :', current_key_speed)
-            if current_key_speed > const.MAX_KEY_SPEED:
-                current_key_speed = const.MAX_KEY_SPEED
-            print('current_key_speed 2 :', current_key_speed)
+            if current_key_speed > max_key_speed:
+                current_key_speed = max_key_speed
 
             mapped_current_key_speed = map_key_speed_to_image_speed(
-                const.MIN_KEY_SPEED, const.MAX_KEY_SPEED,
+                const.MIN_KEY_SPEED, max_key_speed,
                 const.MIN_IMAGE_SPEED, const.MAX_IMAGE_SPEED,
                 current_key_speed
             )
-
-            print('mapped_current_key_speed : ', mapped_current_key_speed)
-            print('current_image_speed : ', current_image_speed)
 
             # Speed to gain or loss
             image_speed_diff = mapped_current_key_speed - current_image_speed
@@ -422,9 +429,25 @@ while 1:
 
             last_total_time = total_time
 
-            print('speed diff :', image_speed_diff)
-
             reset_loop = True
+
+            # DYNAMIC DIFFICULTY
+            image_speed_history.popleft()
+            image_speed_history.append(current_image_speed)
+
+            avg = sum(image_speed_history) / len(image_speed_history)
+            print('AVG -- : ', avg)
+
+            print(image_speed_history)
+
+            # Next level of difficulty
+            if avg > const.DIFFICULTY_THRESHOLD * const.MAX_IMAGE_SPEED:
+                print('~~~~~~~~~~~~ NEXT LEVEL OF DIFFICULTY ~~~~~~~~~~~~~~~~')
+                # Reset history
+                image_speed_history = deque([0] * len(image_speed_history))
+                # Increase difficulty by increasing max key speed
+                max_key_speed = int(max_key_speed * const.DIFFICULTY_INCREASE)
+                print('MAX KEY SPEED : ', max_key_speed)
 
         acceleration = 0
 
@@ -457,30 +480,29 @@ while 1:
             print('##### ', current_image_speed, ' #####')
 
         # DEMO MODE TEXT
-        # TODO : MagickNumber
         if state == State.DEMO:
 
             # Text is cropped by the right side of the screen
-            if (demo_text_pos + text_demo.get_width() >= screen_width
-                    and demo_text_pos <= screen_width):
+            if (text_demo_pos + text_demo.get_width() >= screen_width
+                    and text_demo_pos <= screen_width):
                 # Displays the cropped part of the text, but from left side
                 screen.blit(
                     text_demo,
-                    (-(screen_width-demo_text_pos), const.TEXT_DEMO_TOP)
+                    (-(screen_width-text_demo_pos), const.TEXT_DEMO_TOP)
                 )
             # Text is completely cropped
-            elif demo_text_pos > screen_width:
+            elif text_demo_pos > screen_width:
                 # Reset text position
-                demo_text_pos = 0
+                text_demo_pos = 0
 
             # Displays the text
             screen.blit(
                 text_demo,
-                (demo_text_pos, const.TEXT_DEMO_TOP)
+                (text_demo_pos, const.TEXT_DEMO_TOP)
             )
 
             # Moves slightly the text to the right
-            demo_text_pos += 3
+            text_demo_pos += const.TEXT_DEMO_SPEED
 
         # REAMINING DISTANCE
         remaining_dist = max(current_level.images_count - index_view, 0)
@@ -805,9 +827,9 @@ while 1:
         if transition_index > 255:
             transition_index = 255
             transition_opacity_step = -transition_opacity_step
+            state = transition_state
             reset_game()
             print('------ GAME RESETED -------')
-            state = transition_state
             # Next level
             if transition_state in [State.LEVEL, State.DEMO]:
                 current_level = next_level
@@ -831,10 +853,10 @@ while 1:
                 'LEVEL ' + str(next_level.id),
                 const.PINK, (1, 1, 1)
             )
-            # TODO : magick number
             screen.blit(
                 text_level,
-                (screen_width/2 - (text_level.get_width()/2), 800)
+                (screen_width/2
+                 - (text_level.get_width()/2), const.TEXT_LEVEL_POS)
             )
 
     # Updates screen

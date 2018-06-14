@@ -14,7 +14,7 @@ SCREEN_HEIGHT_DEFAULT = 1920  # 640
 SCREEN_WIDTH_DEFAULT = 1080  # 640
 
 # Controls
-TEST_DANCEPAD = False
+TEST_DANCEPAD = True
 
 # Defaults
 UP_ARROW = 2
@@ -28,8 +28,11 @@ if TEST_DANCEPAD:
     RIGHT_ARROW = 3
 
 # Parameters
-INACTIVITY_TIME_IN_MENU = 5000  # in ms
+INACTIVITY_TIME_IN_MENU = 30000  # in ms
 INACTIVITY_TIME_IN_GAME = 10000  # in ms
+TIME_TO_UPGRADE_DIFF = 15  # in seconds
+DIFFICULTY_THRESHOLD = 0.7  # percent of the maximum image speed
+DIFFICULTY_INCREASE = 1.2  # increse of maxmium key speed
 FULLSCREEN = False
 DELTA_TIME = 0.3  # in seconds
 DECELERATION_POWER = -7  # Slow down speed by N images per second
@@ -52,7 +55,7 @@ MENU_BLUE = (33, 183, 224)
 
 # Speed
 MIN_KEY_SPEED = 0
-MAX_KEY_SPEED = 8
+DEFAULT_MAX_KEY_SPEED = 8
 
 MIN_IMAGE_SPEED = 0.3
 MAX_IMAGE_SPEED = 20
@@ -142,6 +145,8 @@ CLUE_AREA_POINTS = calc_points_aa_filled_pie(
 
 # Transition
 TRANSITION_OPACITY_DELTA = 10
+TEXT_LEVEL_POS = 800
 
 # Demo
 TEXT_DEMO_TOP = 1400
+TEXT_DEMO_SPEED = 3  # pixel shifted per loop
