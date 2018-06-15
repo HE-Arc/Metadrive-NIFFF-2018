@@ -504,6 +504,9 @@ while 1:
             # Moves slightly the text to the right
             text_demo_pos += const.TEXT_DEMO_SPEED
 
+        # BACKGROUND REMAINING INDICATORS
+        pygame.gfxdraw.box(screen, const.BG_RECT_INDICATORS, const.ABLACK)
+
         # REAMINING DISTANCE
         remaining_dist = max(current_level.images_count - index_view, 0)
         text_dist_remaining = textOutline(
@@ -514,7 +517,7 @@ while 1:
         )
         screen.blit(
             text_dist_remaining,
-            (screen_width/2 - (text_dist_remaining.get_width()/2), 400)
+            (const.TEXT_DISTANCE_LEFT, const.TEXT_DISTANCE_TOP)
         )
         # REMAINING TIME
         # Level has nearly timed out
@@ -528,7 +531,7 @@ while 1:
             )
             screen.blit(
                 text_time_remaining,
-                (screen_width/2 - (text_time_remaining.get_width()/2), 500)
+                (const.TEXT_TIME_LEFT, const.TEXT_TIME_TOP)
             )
 
         # CLUES
@@ -583,11 +586,16 @@ while 1:
                     )
             # Current subtitle has to stay on screen a little more
             else:
-                screen.blit(
-                    subtitle_text,
-                    (screen_width/2 - (subtitle_text.get_width()/2),
-                     const.SUBTITLE_TEXT_TOP)
+                pos = (screen_width/2 - (subtitle_text.get_width()/2),
+                       const.SUBTITLE_TEXT_TOP)
+                bg_rect = Rect(
+                    pos[0]-const.SUBTITLE_BG_PADDING,
+                    pos[1]-const.SUBTITLE_BG_PADDING,
+                    subtitle_text.get_width() + 2*const.SUBTITLE_BG_PADDING,
+                    subtitle_text.get_height() + 2*const.SUBTITLE_BG_PADDING
                 )
+                pygame.gfxdraw.box(screen, bg_rect, const.ABLACK)
+                screen.blit(subtitle_text, pos)
 
         # SPEEDOMETER
         speedometer_main_needle_angle = get_angle_dial(
