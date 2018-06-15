@@ -45,7 +45,7 @@ def map_key_speed_to_image_speed(
         current_key_speed):
     """ Convert a key speed in a range to an image speed also in a range """
     slow_image_speed_percent = 0.4
-    slow_key_speed_percent = 0.5
+    slow_key_speed_percent = 0.8
     real_delta_image_speed = max_image_speed - min_image_speed
     slow_delta_image_speed = real_delta_image_speed * slow_image_speed_percent
     fast_delta_image_speed = (real_delta_image_speed

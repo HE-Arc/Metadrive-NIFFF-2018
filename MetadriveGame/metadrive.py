@@ -165,7 +165,7 @@ visitor_font_demo = pygame.font.Font(font_path, 70)
 
 # Main title
 text_main_title = textOutline(
-    visitor_font_main_title, 'METADRIVE', const.PINK, (1, 1, 1)
+    visitor_font_main_title, 'METADRIVE', const.PINK, (255, 255, 255)
 )
 # Demo mode
 text_demo = textOutline(
@@ -758,7 +758,7 @@ while 1:
 
     elif state == State.MENU:
         # Background
-        screen.fill(const.MENU_BLUE)
+        screen.fill(const.BLACK)
         # Title
         screen.blit(
             text_main_title,
@@ -768,7 +768,7 @@ while 1:
         # Levels
         for i, level in enumerate(Level.level_list):
             text_level = textOutline(
-                visitor_font, 'Level ' + str(level.id), const.PINK, (1, 1, 1)
+                visitor_font, 'LEVEL ' + str(level.id), const.PINK, (255, 255, 255)
             )
             screen.blit(
                 text_level,
@@ -777,7 +777,7 @@ while 1:
             )
 
         text_select_level = textOutline(
-            visitor_font, '--------', const.PINK, (1, 1, 1)
+            visitor_font, '--------', const.PINK, (255, 255, 255)
         )
 
         # Level selection
@@ -851,7 +851,7 @@ while 1:
         pygame.gfxdraw.box(
             screen,
             current_level.image_rect,
-            (255, 255, 255, transition_index)
+            (0, 0, 0, transition_index)
         )
 
         # LEVEL TEXT
@@ -859,7 +859,7 @@ while 1:
             text_level = textOutline(
                 visitor_font_demo,
                 'LEVEL ' + str(next_level.id),
-                const.PINK, (1, 1, 1)
+                const.PINK, (255, 255, 255)
             )
             screen.blit(
                 text_level,

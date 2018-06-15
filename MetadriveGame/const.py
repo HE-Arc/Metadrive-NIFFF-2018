@@ -111,8 +111,8 @@ for i in range(SPEEDOMETER_NUMBER_OF_MARKS):
     )
 
 # Clues
-CLUE_RANGE_MIN = 6./8  # Start Percent of speedometer global angle
-CLUE_RANGE_MAX = 1.0  # End Percent of speedometer global angle
+CLUE_RANGE_MIN = 4./8  # Start Percent of speedometer global angle
+CLUE_RANGE_MAX = 6./8  # End Percent of speedometer global angle
 CLUE_RADIUS = int(SPEEDOMETER_RADIUS * 0.9)
 
 SUBTITLE_BG_PADDING = 10
