@@ -39,7 +39,7 @@ def reset_game():
     global index_view, last_image_time, current_key_speed, current_image_speed
     global current_clue, last_activity, level_start_time
     global key_pressed_count, mapped_current_key_speed, state, max_key_speed
-    global image_speed_history
+    global key_speed_history, total_clue_time, last_time_inside_clue
 
     # Back to first image
     index_view = 1
@@ -52,6 +52,8 @@ def reset_game():
     # Reset clues in current level
     current_level.reset()
     current_clue = None
+    total_clue_time = 0
+    last_time_inside_clue = 0
     # Reset inactivity time
     last_activity = pygame.time.get_ticks()
     # Reset level time
@@ -60,7 +62,8 @@ def reset_game():
     # Reset difficulty when back in menu
     if state == State.MENU:
         max_key_speed = const.DEFAULT_MAX_KEY_SPEED
-        image_speed_history = deque([0] * len(image_speed_history))
+        key_speed_history = deque([const.MIN_KEY_SPEED]
+                                  * len(key_speed_history))
 
 # --------------------------------------------------------------------------
 # ------------------------------- CLASSES ----------------------------------
@@ -220,7 +223,10 @@ first_level_played = 0
 
 # Clues
 clue_interact_display = False
+inside_clue_duration = 0
+total_clue_time = 0
 current_clue = None
+last_time_inside_clue = 0
 
 # Subtitles
 current_subtitle_duration = const.SUBTITLE_MIN_DURATION
@@ -249,9 +255,8 @@ current_image_speed = const.MIN_IMAGE_SPEED
 last_image_speed = const.MIN_IMAGE_SPEED
 image_speed_diff = 0
 
-# Sized to contains 15s of image speed data
-image_speed_history = deque([0] *
-                            int(const.TIME_TO_UPGRADE_DIFF/const.DELTA_TIME))
+# Contains the last 3 key speed
+key_speed_history = deque([const.MIN_KEY_SPEED] * const.KEY_SPEED_HISTO_LENGTH)
 
 print('Min image speed : ', const.MIN_IMAGE_SPEED)
 print('Max image speed : ', const.MAX_IMAGE_SPEED)
@@ -263,6 +268,13 @@ print(
     'Min angle clue : ', const.CLUE_MIN_ANGLE,
     'Max angle clue : ', const.CLUE_MAX_ANGLE
 )
+
+# Menu animation
+menu_animation_index = 0
+images_menu_animation = []
+for i in range(3):
+    images_menu_animation.append(
+        pygame.image.load(f'images/road_{i}.tif'))
 
 # --------------------------------------------------------------------------
 # ------------------------------ MAIN LOOP ---------------------------------
@@ -284,27 +296,19 @@ while 1:
         # Joystick Event
         if event.type in (JOYBUTTONDOWN, KEYDOWN):
 
-            if is_dancepad_connected:
-                # Get information about joystick buttons
-                # OR Could have use event.button
-                dp_output = get_dancepad_output()
-
-            # Print button activation
-            if hasattr(event, 'button'):
-                print(dp_output)
-
             # A button has been hit -> Reset inactivity
             last_activity = pygame.time.get_ticks()
 
             # Left Button
-            if (dp_output[const.LEFT_ARROW]
+            if ((getattr(event, 'button', False) == const.LEFT_ARROW
+                    and is_dancepad_connected)
                     or getattr(event, 'key', False) == K_k):
+                print('HALO')
                 if state == State.LEVEL:
                     if btn_right_pressed:
                         btn_left_pressed = True
                         btn_right_pressed = False
                         key_pressed_count += 1
-
                 elif state == State.MENU:
                     transition_state = State.LEVEL
                     # Save first level to know
@@ -312,16 +316,19 @@ while 1:
                     first_level_played = next_level
 
             # Right Button
-            if (dp_output[const.RIGHT_ARROW]
+            elif (getattr(event, 'button', False) == const.RIGHT_ARROW
                     or getattr(event, 'key', False) == K_l):
                 if state == State.LEVEL:
                     if btn_left_pressed:
                         btn_left_pressed = False
                         btn_right_pressed = True
                         key_pressed_count += 1
+                elif state == State.MENU:
+                    transition_state = State.LEVEL
+                    first_level_played = next_level
 
             # UP Button
-            if (dp_output[const.UP_ARROW]
+            elif (getattr(event, 'button', False) == const.UP_ARROW
                     or getattr(event, 'key', False) == K_o):
                 if state == State.LEVEL:
                     pass
@@ -333,7 +340,7 @@ while 1:
                     ]
 
             # DOWN Button
-            if (dp_output[const.DOWN_ARROW]
+            elif (getattr(event, 'button', False) == const.DOWN_ARROW
                     or getattr(event, 'key', False) == K_m):
                 if state == State.LEVEL:
                     transition_state = State.MENU
@@ -428,11 +435,21 @@ while 1:
             print('real speed : ', (index_view - saved_index_view)/total_time)
             saved_index_view = index_view
 
-            current_key_speed = key_pressed_count/total_time
+            # DYNAMIC DIFFICULTY
+            key_speed_history.popleft()
+            key_speed_history.append(key_pressed_count)
+
+            avg_key_speed = sum(key_speed_history) / (const.KEY_SPEED_HISTO_LENGTH*const.DELTA_TIME)
+            print('AVG -- : ', avg_key_speed)
+
+            instant_key_speed = key_pressed_count/total_time
+
+            current_key_speed = 0.3*instant_key_speed + 0.7*avg_key_speed
+
             if current_key_speed > max_key_speed:
                 current_key_speed = max_key_speed
 
-            mapped_current_key_speed = map_key_speed_to_image_speed(
+            mapped_current_key_speed = map_range_to_range(
                 const.MIN_KEY_SPEED, max_key_speed,
                 const.MIN_IMAGE_SPEED, const.MAX_IMAGE_SPEED,
                 current_key_speed
@@ -450,24 +467,6 @@ while 1:
             last_total_time = total_time
 
             reset_loop = True
-
-            # DYNAMIC DIFFICULTY
-            image_speed_history.popleft()
-            image_speed_history.append(current_image_speed)
-
-            avg = sum(image_speed_history) / len(image_speed_history)
-            print('AVG -- : ', avg)
-
-            print(image_speed_history)
-
-            # Next level of difficulty
-            if avg > const.DIFFICULTY_THRESHOLD * const.MAX_IMAGE_SPEED:
-                print('~~~~~~~~~~~~ NEXT LEVEL OF DIFFICULTY ~~~~~~~~~~~~~~~~')
-                # Reset history
-                image_speed_history = deque([0] * len(image_speed_history))
-                # Increase difficulty by increasing max key speed
-                max_key_speed = int(max_key_speed * const.DIFFICULTY_INCREASE)
-                print('MAX KEY SPEED : ', max_key_speed)
 
         acceleration = 0
 
@@ -561,24 +560,32 @@ while 1:
         if (speedometer_main_needle_angle_degrees >= const.CLUE_MAX_ANGLE
            and speedometer_main_needle_angle_degrees <= const.CLUE_MIN_ANGLE):
 
-            # NO CLUE CURRENTLY ENABLED : No subtitles are currently displayed
-            if not current_clue:
-                print('CLUE HAS TO BE LOAD')
-                clue = current_level.get_random_clue()
-                # Check if there's a clue left inside this level
-                if clue:
-                    current_clue = clue
-                    print('CLUE ENABLED')
-                # No clue left
-                else:
-                    pass
-            # CLUE ENABLE
-            else:
-                # NOTE : paste clue enabled section here to see second version
-                pass
+            # Increments the total time when already inside
+            if last_time_inside_clue:
+                total_clue_time += pygame.time.get_ticks() - last_time_inside_clue
+
+            last_time_inside_clue = pygame.time.get_ticks()
+
+            # Enable Clue when Total time reaches Stay time
+            if total_clue_time > const.CLUE_STAY_TIME:
+                # NO CLUE CURRENTLY ENABLED : No subtitles are currently displayed
+                if not current_clue:
+                    print('CLUE HAS TO BE LOAD')
+                    clue = current_level.get_random_clue()
+                    # Check if there's a clue left inside this level
+                    if clue:
+                        current_clue = clue
+                        print('CLUE ENABLED')
+                    # No clue left
+                    else:
+                        pass
         # OUTSIDE THE CLUE AREA
         else:
-            pass
+            last_time_inside_clue = 0
+            # Decrease the clue progress when outside the area
+            if not current_clue:
+                # TODO: should imply time
+                total_clue_time = max(total_clue_time-const.CLUE_DROP_SPEED, 0)
 
         # CLUE ENABLED : A clue has been enabled
         if current_clue:
@@ -593,6 +600,10 @@ while 1:
                 if not subtitle:
                     print('NO MORE SUBTITLE')
                     current_clue = None
+                    total_clue_time = 0
+                    # Increase difficulty by increasing max key speed
+                    max_key_speed += const.DIFFICULTY_INCREASE
+                    print('MAX KEY SPEED : ', max_key_speed)
                 # Prepare the subtitle to be displayed
                 else:
                     print('NEW SUBTITLE LOADED')
@@ -655,14 +666,25 @@ while 1:
             const.AWHITE
         )
         # Smaller background
-        draw_aa_filled_pie(screen, const.LARGE_DIAL_BG_POINTS, const.ABLACK)
+        draw_aa_pie(screen, const.LARGE_DIAL_BG_POINTS, const.ABLACK)
+
+        # Clue area
+        draw_aa_pie(screen, const.CLUE_AREA_POINTS, const.ALIGHTPINK)
+
+        clue_filled_area_points = calc_points_aa_filled_pie(
+            const.SPEEDOMETER_CENTER_X,
+            const.SPEEDOMETER_CENTER_Y,
+            min(total_clue_time/const.CLUE_STAY_TIME, 1)*const.CLUE_RADIUS,
+            const.CLUE_MAX_ANGLE,
+            const.CLUE_MIN_ANGLE
+        )
+
+        draw_aa_pie(screen, clue_filled_area_points, const.PINK)
 
         # Speed Marks
         for mark in const.MARKS_POINTS:
             pygame.draw.line(screen, const.WHITE, mark[0], mark[1], 4)
 
-        # Clue area
-        draw_aa_filled_pie(screen, const.CLUE_AREA_POINTS, const.PINK)
 
         # Display Acceleration and Deceleration between needles
 
@@ -840,6 +862,12 @@ while 1:
             text_menu_drive,
             (right_arrow_x - 30, h_arrows_y + const.TEXT_ARROW_DELTA)
         )
+
+        # Animated ROAD
+        # TODO Magick N
+        screen.blit(images_menu_animation[menu_animation_index], (0, 1280))
+        menu_animation_index = (menu_animation_index+1) % 3
+
 
         # Check activity to launch Demo mod
         if (pygame.time.get_ticks() - last_activity

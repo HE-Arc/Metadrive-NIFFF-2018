@@ -4,7 +4,7 @@ import math
 
 from utils import *
 
-DEBUG = False
+DEBUG = True
 
 # Main loop tick rate
 TICK_RATE = 30  # 30 tick per seconds
@@ -14,7 +14,7 @@ SCREEN_HEIGHT_DEFAULT = 1920  # 640
 SCREEN_WIDTH_DEFAULT = 1080  # 640
 
 # Controls
-TEST_DANCEPAD = False
+TEST_DANCEPAD = True
 
 # Defaults
 UP_ARROW = 2
@@ -30,13 +30,13 @@ if TEST_DANCEPAD:
 # Parameters
 INACTIVITY_TIME_IN_MENU = 30000  # in ms
 INACTIVITY_TIME_IN_GAME = 15000  # in ms
-TIME_TO_UPGRADE_DIFF = 15  # in seconds
-DIFFICULTY_THRESHOLD = 0.7  # percent of the maximum image speed
-DIFFICULTY_INCREASE = 1.2  # increse of maxmium key speed
+DIFFICULTY_INCREASE = 1
 FULLSCREEN = False
 DELTA_TIME = 0.3  # in seconds
 DECELERATION_POWER = -7  # Slow down speed by N images per second
 ACCELERATION_POWER = 4  # Speed goes up by N images per second
+
+KEY_SPEED_HISTO_LENGTH = 3
 
 # Icon and window title
 ICON_IMAGE = "images/"
@@ -51,7 +51,8 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 AWHITE = (255, 255, 255, 70)
-PINK = (235, 62, 149)  # (255, 72, 220)
+PINK = (235, 62, 149)
+ALIGHTPINK = (255, 107, 181)
 MENU_BLUE = (33, 183, 224)
 
 # Speed
@@ -65,7 +66,7 @@ MAX_IMAGE_SPEED = 20
 
 # Speedometer
 SPEEDOMETER_CENTER_X = 230
-SPEEDOMETER_CENTER_Y = 1650  # 600
+SPEEDOMETER_CENTER_Y = 600  # 1650  # 600
 SPEEDOMETER_RADIUS = 170
 SPEEDOMETER_EXTERN_RADIUS = int(SPEEDOMETER_RADIUS * 1.1)
 
@@ -112,12 +113,14 @@ for i in range(SPEEDOMETER_NUMBER_OF_MARKS):
     )
 
 # Clues
-CLUE_RANGE_MIN = 4./8  # Start Percent of speedometer global angle
-CLUE_RANGE_MAX = 6./8  # End Percent of speedometer global angle
+CLUE_STAY_TIME = 3000  # ms
+CLUE_DROP_SPEED = 100
+CLUE_RANGE_MIN = 3./8  # Start Percent of speedometer global angle
+CLUE_RANGE_MAX = 5./8  # End Percent of speedometer global angle
 CLUE_RADIUS = int(SPEEDOMETER_RADIUS * 0.9)
 
 SUBTITLE_BG_PADDING = 10
-SUBTITLE_TEXT_TOP = 1200
+SUBTITLE_TEXT_TOP = 500  # 1200
 SUBTITLE_MIN_DURATION = 2
 SUBTITLE_DURATION_BY_CHAR = 0.1
 

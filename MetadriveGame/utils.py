@@ -106,10 +106,11 @@ def calc_points_aa_filled_pie(center_x, center_y, radius, angle_a, angle_b):
     return p
 
 
-def draw_aa_filled_pie(surface, points, color):
+def draw_aa_pie(surface, points, color, filled=True):
     """ Draw a filled antialiazed pie from a list of points """
 
-    pygame.gfxdraw.filled_polygon(surface, points, color)
+    if filled:
+        pygame.gfxdraw.filled_polygon(surface, points, color)
     pygame.gfxdraw.aapolygon(surface, points, color)
     # pygame.gfxdraw.arc(surface, center_x, center_y, radius, -angle_b,
     #                    -angle_a, color)
