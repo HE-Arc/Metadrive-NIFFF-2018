@@ -159,18 +159,38 @@ clock = pygame.time.Clock()
 
 # Fonts
 font_path = "./fonts/terminal-grotesque.ttf"
-visitor_font = pygame.font.Font(font_path, 45)
-visitor_font_main_title = pygame.font.Font(font_path, 90)
-visitor_font_demo = pygame.font.Font(font_path, 70)
+base_font = pygame.font.Font(font_path, 45)
+selected_font = pygame.font.Font(font_path, 55)
+arrow_font = pygame.font.Font(font_path, 150)
+main_title_font = pygame.font.Font(font_path, 90)
+demo_font = pygame.font.Font(font_path, 70)
+indications_arrow_font = pygame.font.Font(font_path, 35)
 
 # Main title
-text_main_title = textOutline(
-    visitor_font_main_title, 'METADRIVE', const.PINK, (255, 255, 255)
-)
+text_main_title = main_title_font.render('M E T A D R I V E', 1, const.PINK)
+
+# text_main_title = textOutline(
+#     main_title_font, 'M E T A D R I V E', const.PINK, (255, 255, 255)
+# )
+
 # Demo mode
 text_demo = textOutline(
-    visitor_font_demo, 'PRESS ANY KEY TO START', const.PINK, (1, 1, 1)
+    demo_font, 'PRESS ANY KEY TO START', const.PINK, (1, 1, 1)
 )
+
+# Main menu arrows
+text_left_arrow = arrow_font.render('<', 1, const.PINK)
+text_right_arrow = arrow_font.render('>', 1, const.PINK)
+
+text_up_arrow = text_left_arrow.copy()
+text_up_arrow = pygame.transform.rotate(text_up_arrow, -90)
+
+text_down_arrow = text_left_arrow.copy()
+text_down_arrow = pygame.transform.rotate(text_down_arrow, 90)
+
+mid_arrow_pos = screen_width/2 - (text_up_arrow.get_width()/2)
+
+text_menu_drive = indications_arrow_font.render('DRIVE', 1, const.PINK)
 
 
 # General
@@ -510,7 +530,7 @@ while 1:
         # REAMINING DISTANCE
         remaining_dist = max(current_level.images_count - index_view, 0)
         text_dist_remaining = textOutline(
-            visitor_font,
+            base_font,
             'Distance : ' + str(remaining_dist),
             const.PINK,
             (1, 1, 1)
@@ -524,7 +544,7 @@ while 1:
         if level_remaining_time <= 10 and level_remaining_time > 0:
 
             text_time_remaining = textOutline(
-                visitor_font,
+                base_font,
                 'Time : ' + str(int(level_remaining_time)),
                 const.PINK,
                 (1, 1, 1)
@@ -582,7 +602,7 @@ while 1:
                     )
                     subtitle_start_time = pygame.time.get_ticks()
                     subtitle_text = textOutline(
-                        visitor_font, subtitle, const.WHITE, (1, 1, 1)
+                        base_font, subtitle, const.WHITE, (1, 1, 1)
                     )
             # Current subtitle has to stay on screen a little more
             else:
@@ -762,32 +782,66 @@ while 1:
         # Title
         screen.blit(
             text_main_title,
-            (screen_width/2 - (text_main_title.get_width()/2), 300)
+            (screen_width/2 -
+             (text_main_title.get_width()/2), const.TEXT_MAIN_TITLE_TOP)
         )
 
         # Levels
         for i, level in enumerate(Level.level_list):
-            text_level = textOutline(
-                visitor_font, 'LEVEL ' + str(level.id), const.PINK, (255, 255, 255)
+            if level == next_level:
+                font_level = selected_font
+            else:
+                font_level = base_font
+
+            text_level = font_level.render(
+                'LEVEL ' + str(level.id), 1,
+                const.PINK
             )
+
+            mid_level_pos = screen_width/2 - (text_level.get_width()/2)
+
             screen.blit(
                 text_level,
-                (screen_width/2 - (text_level.get_width()/2),
-                 600 + i * 400)
+                (mid_level_pos,
+                 const.TEXT_LEVELS_TOP + i * const.TEXT_SPACING_LEVELS)
             )
 
-        text_select_level = textOutline(
-            visitor_font, '--------', const.PINK, (255, 255, 255)
-        )
+        # Up Arrow
+        screen.blit(text_up_arrow, (mid_arrow_pos, const.UP_ARROW_TOP))
 
-        # Level selection
+        # Down Arrow
+        screen.blit(text_down_arrow, (mid_arrow_pos, const.DOWN_ARROW_TOP))
+
+        h_arrows_y = (
+            const.H_ARROWS_TOP
+            + (next_level.id-1)*const.TEXT_SPACING_LEVELS
+        )
+        left_arrow_x = (screen_width/2 - const.H_ARROWS_SPACING
+                        - text_left_arrow.get_width())
+        right_arrow_x = screen_width/2 + const.H_ARROWS_SPACING
+
+        # Horizonzal Arrows
         screen.blit(
-            text_select_level,
-            (screen_width/2 - (text_select_level.get_width()/2),
-             650 + (next_level.id-1) * 400)
+            text_left_arrow,
+            (left_arrow_x, h_arrows_y)
+        )
+        screen.blit(
+            text_right_arrow,
+            (right_arrow_x, h_arrows_y)
         )
 
-        # Demo mod
+        # TODO : Magick N
+        # Drive indications below Arrows
+        screen.blit(
+            text_menu_drive,
+            (left_arrow_x - 20, h_arrows_y + const.TEXT_ARROW_DELTA)
+        )
+        screen.blit(
+            text_menu_drive,
+            (right_arrow_x - 30, h_arrows_y + const.TEXT_ARROW_DELTA)
+        )
+
+        # Check activity to launch Demo mod
         if (pygame.time.get_ticks() - last_activity
                 > const.INACTIVITY_TIME_IN_MENU) and not transition_state:
             # Random level
@@ -857,9 +911,9 @@ while 1:
         # LEVEL TEXT
         if transition_state == State.LEVEL:
             text_level = textOutline(
-                visitor_font_demo,
+                demo_font,
                 'LEVEL ' + str(next_level.id),
-                const.PINK, (255, 255, 255)
+                const.PINK, const.ALMOST_BLACK
             )
             screen.blit(
                 text_level,
