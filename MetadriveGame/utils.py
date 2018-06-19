@@ -114,3 +114,8 @@ def draw_aa_pie(surface, points, color, filled=True):
     pygame.gfxdraw.aapolygon(surface, points, color)
     # pygame.gfxdraw.arc(surface, center_x, center_y, radius, -angle_b,
     #                    -angle_a, color)
+
+
+def center_text(surface, text):
+    """ Return x position of the text centered on the given surface """
+    return surface.get_width()/2 - text.get_width()/2

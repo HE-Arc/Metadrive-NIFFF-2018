@@ -153,6 +153,7 @@ else:
     screen_height = const.SCREEN_HEIGHT_DEFAULT
 
 screen = pygame.display.set_mode([screen_width, screen_height], flags)
+screen_center_x = screen_width/2
 
 # Mouse
 # pygame.mouse.set_visible(False)
@@ -164,37 +165,68 @@ clock = pygame.time.Clock()
 font_path = "./fonts/terminal-grotesque.ttf"
 base_font = pygame.font.Font(font_path, 45)
 selected_font = pygame.font.Font(font_path, 55)
-arrow_font = pygame.font.Font(font_path, 150)
+menu_arrow_font = pygame.font.Font(font_path, 150)
 main_title_font = pygame.font.Font(font_path, 90)
 demo_font = pygame.font.Font(font_path, 70)
 indications_arrow_font = pygame.font.Font(font_path, 35)
+tuto_arrow_font = pygame.font.Font(font_path, 200)
+countdown_font = pygame.font.Font(font_path, 150)
 
 # Main title
 text_main_title = main_title_font.render('M E T A D R I V E', 1, const.PINK)
 
-# text_main_title = textOutline(
-#     main_title_font, 'M E T A D R I V E', const.PINK, (255, 255, 255)
-# )
-
 # Demo mode
 text_demo = textOutline(
-    demo_font, 'PRESS ANY KEY TO START', const.PINK, (1, 1, 1)
+    demo_font, 'PRESS ANY KEY TO START', const.PINK, const.ALMOST_BLACK
 )
 
-# Main menu arrows
-text_left_arrow = arrow_font.render('<', 1, const.PINK)
-text_right_arrow = arrow_font.render('>', 1, const.PINK)
-
-text_up_arrow = text_left_arrow.copy()
-text_up_arrow = pygame.transform.rotate(text_up_arrow, -90)
-
-text_down_arrow = text_left_arrow.copy()
-text_down_arrow = pygame.transform.rotate(text_down_arrow, 90)
-
-mid_arrow_pos = screen_width/2 - (text_up_arrow.get_width()/2)
+# Main menu arrows and texts
+text_menu_left_arrow = menu_arrow_font.render('<', 1, const.PINK)
+text_menu_right_arrow = menu_arrow_font.render('>', 1, const.PINK)
+text_menu_up_arrow = text_menu_left_arrow.copy()
+text_menu_up_arrow = pygame.transform.rotate(text_menu_up_arrow, -90)
+text_menu_down_arrow = text_menu_left_arrow.copy()
+text_menu_down_arrow = pygame.transform.rotate(text_menu_down_arrow, 90)
 
 text_menu_drive = indications_arrow_font.render('DRIVE', 1, const.PINK)
 
+menu_v_arrows_x = center_text(screen, text_menu_up_arrow)
+menu_left_arrow_x = (screen_center_x - const.MENU_H_ARROWS_SPACING
+                     - text_menu_left_arrow.get_width())
+menu_right_arrow_x = screen_center_x + const.MENU_H_ARROWS_SPACING
+
+menu_left_drive_x = menu_left_arrow_x - 20
+menu_right_drive_x = menu_right_arrow_x - 30
+
+# Tutorial texts
+text_tuto_left_arrow = textOutline(
+    tuto_arrow_font, '<', const.PINK, const.ALMOST_BLACK
+)
+text_tuto_right_arrow = textOutline(
+    tuto_arrow_font, '>', const.PINK, const.ALMOST_BLACK
+)
+text_tuto_down_arrow = text_tuto_left_arrow.copy()
+text_tuto_down_arrow = pygame.transform.rotate(text_tuto_down_arrow, 90)
+
+text_tuto_drive = textOutline(
+    base_font, 'DRIVE', const.PINK, const.ALMOST_BLACK
+)
+text_tuto_down_indic = textOutline(
+    base_font, 'BACK TO MENU', const.PINK, const.ALMOST_BLACK
+)
+
+tuto_up_arrow_x = center_text(screen, text_tuto_down_arrow)
+tuto_left_arrow_x = (screen_center_x - const.TUTO_H_ARROWS_SPACING
+                     - text_tuto_left_arrow.get_width())
+tuto_right_arrow_x = screen_center_x + const.TUTO_H_ARROWS_SPACING
+tuto_drive_indic_x = center_text(screen, text_tuto_drive)
+tuto_down_indic_x = center_text(screen, text_tuto_down_indic)
+
+# Remaining time
+text_time_indic = textOutline(
+    base_font, 'REMAINING TIME', const.PINK, const.ALMOST_BLACK
+)
+text_time_indic_x = center_text(screen, text_time_indic)
 
 # General
 state = State.MENU
@@ -212,9 +244,22 @@ btn_right_pressed = True
 transition_index = 0
 transition_opacity_step = const.TRANSITION_OPACITY_DELTA
 transition_state = False
+rect_transition_level = Rect(
+    (0, const.TEXT_LEVEL_TOP - const.TEXT_DEMO_PADDING),
+    (screen_width, const.TEXT_LEVEL_HEIGHT + 2*const.TEXT_DEMO_PADDING)
+)
 
 # Demo
-text_demo_pos = (screen_width/2) - (text_demo.get_width()/2)
+text_demo_x = center_text(screen, text_demo)
+rect_demo_text = Rect(
+    (0, const.TEXT_DEMO_TOP - const.TEXT_DEMO_PADDING),
+    (screen_width, text_demo.get_height() + 2*const.TEXT_DEMO_PADDING)
+)
+
+# Tutorial
+tutorial_passed = False
+show_left_arrow = True
+last_arrow_displayed = 0
 
 # Level
 current_level = Level.level_list[0]
@@ -271,8 +316,9 @@ print(
 
 # Menu animation
 menu_animation_index = 0
+last_animation_frame = 0
 images_menu_animation = []
-for i in range(3):
+for i in range(const.ANIMATION_IMAGES_COUNT):
     images_menu_animation.append(
         pygame.image.load(f'images/road_{i}.tif'))
 
@@ -303,7 +349,6 @@ while 1:
             if ((getattr(event, 'button', False) == const.LEFT_ARROW
                     and is_dancepad_connected)
                     or getattr(event, 'key', False) == K_k):
-                print('HALO')
                 if state == State.LEVEL:
                     if btn_right_pressed:
                         btn_left_pressed = True
@@ -405,7 +450,7 @@ while 1:
         elif not transition_state:
             print('------ END OF THIS LEVEL -------')
             # Nobody is playing currently -> Back to menu
-            if (pygame.time.get_ticks()-last_activity
+            if (pygame.time.get_ticks() - last_activity
                > const.INACTIVITY_TIME_IN_GAME):
                 transition_state = State.MENU
                 print('------ BACK TO MENU (AFK) -------')
@@ -439,11 +484,13 @@ while 1:
             key_speed_history.popleft()
             key_speed_history.append(key_pressed_count)
 
-            avg_key_speed = sum(key_speed_history) / (const.KEY_SPEED_HISTO_LENGTH*const.DELTA_TIME)
+            avg_key_speed = (sum(key_speed_history)
+                             / (const.KEY_SPEED_HISTO_LENGTH*const.DELTA_TIME))
             print('AVG -- : ', avg_key_speed)
 
             instant_key_speed = key_pressed_count/total_time
 
+            # TODO : Magick Number
             current_key_speed = 0.3*instant_key_speed + 0.7*avg_key_speed
 
             if current_key_speed > max_key_speed:
@@ -501,56 +548,108 @@ while 1:
         # DEMO MODE TEXT
         if state == State.DEMO:
 
+            # Background to text
+            pygame.gfxdraw.box(screen, rect_demo_text, const.ABLACK)
+
             # Text is cropped by the right side of the screen
-            if (text_demo_pos + text_demo.get_width() >= screen_width
-                    and text_demo_pos <= screen_width):
+            if (text_demo_x + text_demo.get_width() >= screen_width
+                    and text_demo_x <= screen_width):
                 # Displays the cropped part of the text, but from left side
                 screen.blit(
                     text_demo,
-                    (-(screen_width-text_demo_pos), const.TEXT_DEMO_TOP)
+                    (-(screen_width-text_demo_x), const.TEXT_DEMO_TOP)
                 )
             # Text is completely cropped
-            elif text_demo_pos > screen_width:
+            elif text_demo_x > screen_width:
                 # Reset text position
-                text_demo_pos = 0
+                text_demo_x = 0
 
             # Displays the text
             screen.blit(
                 text_demo,
-                (text_demo_pos, const.TEXT_DEMO_TOP)
+                (text_demo_x, const.TEXT_DEMO_TOP)
             )
 
             # Moves slightly the text to the right
-            text_demo_pos += const.TEXT_DEMO_SPEED
+            text_demo_x += const.TEXT_DEMO_SPEED
+        # Not in demo mode
+        else:
+            # TUTORIAL
+            if (not tutorial_passed
+               and first_level_played == current_level
+               and current_image_speed < 0.25 * const.MAX_IMAGE_SPEED):
 
-        # BACKGROUND REMAINING INDICATORS
-        pygame.gfxdraw.box(screen, const.BG_RECT_INDICATORS, const.ABLACK)
+                # Down Arrow
+                screen.blit(
+                    text_tuto_down_arrow,
+                    (tuto_up_arrow_x, const.TUTO_DOWN_ARROW_TOP)
+                )
 
-        # REAMINING DISTANCE
-        remaining_dist = max(current_level.images_count - index_view, 0)
-        text_dist_remaining = textOutline(
-            base_font,
-            'Distance : ' + str(remaining_dist),
-            const.PINK,
-            (1, 1, 1)
-        )
-        screen.blit(
-            text_dist_remaining,
-            (const.TEXT_DISTANCE_LEFT, const.TEXT_DISTANCE_TOP)
-        )
+                # Horizonzal Arrows
+                if show_left_arrow:
+                    screen.blit(
+                        text_tuto_left_arrow,
+                        (tuto_left_arrow_x, const.TUTO_H_ARROWS_TOP)
+                    )
+                else:
+                    screen.blit(
+                        text_tuto_right_arrow,
+                        (tuto_right_arrow_x, const.TUTO_H_ARROWS_TOP)
+                    )
+
+                if (pygame.time.get_ticks() - last_arrow_displayed
+                   > const.TUTO_ARROW_DURATION):
+                    last_arrow_displayed = pygame.time.get_ticks()
+                    show_left_arrow = not show_left_arrow
+
+                # Drive indications between arrows
+                screen.blit(
+                    text_tuto_drive,
+                    (tuto_drive_indic_x, const.TUTO_H_INDIC_TOP)
+                )
+
+                # Down arrow text indications
+                screen.blit(
+                    text_tuto_down_indic,
+                    (tuto_down_indic_x, const.TUTO_DOWN_INDIC_TOP)
+                )
+            else:
+                tutorial_passed = True
+
+        if const.DEBUG:
+            # REAMINING DISTANCE
+            remaining_dist = max(current_level.images_count - index_view, 0)
+            text_dist_remaining = textOutline(
+                base_font,
+                'Distance : ' + str(remaining_dist),
+                const.PINK,
+                const.ALMOST_BLACK
+            )
+            screen.blit(
+                text_dist_remaining,
+                (const.TEXT_DISTANCE_LEFT, const.TEXT_DISTANCE_TOP)
+            )
+
         # REMAINING TIME
         # Level has nearly timed out
         if level_remaining_time <= 10 and level_remaining_time > 0:
 
-            text_time_remaining = textOutline(
-                base_font,
-                'Time : ' + str(int(level_remaining_time)),
+            text_time_count = textOutline(
+                countdown_font,
+                str(int(level_remaining_time)),
                 const.PINK,
-                (1, 1, 1)
+                const.ALMOST_BLACK
             )
+            text_time_x = center_text(screen, text_time_count)
+            # Countdown
             screen.blit(
-                text_time_remaining,
-                (const.TEXT_TIME_LEFT, const.TEXT_TIME_TOP)
+                text_time_count,
+                (text_time_x, const.TEXT_TIME_COUNT_TOP)
+            )
+            # Text indication
+            screen.blit(
+                text_time_indic,
+                (text_time_indic_x, const.TEXT_TIME_INDIC_TOP)
             )
 
         # CLUES
@@ -562,13 +661,14 @@ while 1:
 
             # Increments the total time when already inside
             if last_time_inside_clue:
-                total_clue_time += pygame.time.get_ticks() - last_time_inside_clue
+                total_clue_time += (pygame.time.get_ticks()
+                                    - last_time_inside_clue)
 
             last_time_inside_clue = pygame.time.get_ticks()
 
             # Enable Clue when Total time reaches Stay time
             if total_clue_time > const.CLUE_STAY_TIME:
-                # NO CLUE CURRENTLY ENABLED : No subtitles are currently displayed
+                # NO CLUE CURRENTLY ENABLED : No subtitles are displayed
                 if not current_clue:
                     print('CLUE HAS TO BE LOAD')
                     clue = current_level.get_random_clue()
@@ -613,18 +713,19 @@ while 1:
                     )
                     subtitle_start_time = pygame.time.get_ticks()
                     subtitle_text = textOutline(
-                        base_font, subtitle, const.WHITE, (1, 1, 1)
+                        base_font, subtitle, const.WHITE, const.ALMOST_BLACK
                     )
             # Current subtitle has to stay on screen a little more
             else:
-                pos = (screen_width/2 - (subtitle_text.get_width()/2),
+                pos = (center_text(screen, subtitle_text),
                        const.SUBTITLE_TEXT_TOP)
-                bg_rect = Rect(
-                    pos[0]-const.SUBTITLE_BG_PADDING,
-                    pos[1]-const.SUBTITLE_BG_PADDING,
-                    subtitle_text.get_width() + 2*const.SUBTITLE_BG_PADDING,
-                    subtitle_text.get_height() + 2*const.SUBTITLE_BG_PADDING
+
+                bg_rect = subtitle_text.get_rect().inflate(
+                    const.SUBTITLE_BG_PADDING,
+                    const.SUBTITLE_BG_PADDING
                 )
+                bg_rect.move_ip(pos)
+
                 pygame.gfxdraw.box(screen, bg_rect, const.ABLACK)
                 screen.blit(subtitle_text, pos)
 
@@ -684,7 +785,6 @@ while 1:
         # Speed Marks
         for mark in const.MARKS_POINTS:
             pygame.draw.line(screen, const.WHITE, mark[0], mark[1], 4)
-
 
         # Display Acceleration and Deceleration between needles
 
@@ -804,8 +904,8 @@ while 1:
         # Title
         screen.blit(
             text_main_title,
-            (screen_width/2 -
-             (text_main_title.get_width()/2), const.TEXT_MAIN_TITLE_TOP)
+            (center_text(screen, text_main_title),
+             const.TEXT_MAIN_TITLE_TOP)
         )
 
         # Levels
@@ -820,54 +920,42 @@ while 1:
                 const.PINK
             )
 
-            mid_level_pos = screen_width/2 - (text_level.get_width()/2)
-
             screen.blit(
                 text_level,
-                (mid_level_pos,
+                (center_text(screen, text_level),
                  const.TEXT_LEVELS_TOP + i * const.TEXT_SPACING_LEVELS)
             )
 
         # Up Arrow
-        screen.blit(text_up_arrow, (mid_arrow_pos, const.UP_ARROW_TOP))
+        screen.blit(text_menu_up_arrow,
+                    (menu_v_arrows_x, const.MENU_UP_ARROW_TOP))
 
         # Down Arrow
-        screen.blit(text_down_arrow, (mid_arrow_pos, const.DOWN_ARROW_TOP))
+        screen.blit(text_menu_down_arrow,
+                    (menu_v_arrows_x, const.MENU_DOWN_ARROW_TOP))
 
         h_arrows_y = (
-            const.H_ARROWS_TOP
+            const.MENU_H_ARROWS_TOP
             + (next_level.id-1)*const.TEXT_SPACING_LEVELS
         )
-        left_arrow_x = (screen_width/2 - const.H_ARROWS_SPACING
-                        - text_left_arrow.get_width())
-        right_arrow_x = screen_width/2 + const.H_ARROWS_SPACING
 
         # Horizonzal Arrows
-        screen.blit(
-            text_left_arrow,
-            (left_arrow_x, h_arrows_y)
-        )
-        screen.blit(
-            text_right_arrow,
-            (right_arrow_x, h_arrows_y)
-        )
+        screen.blit(text_menu_left_arrow, (menu_left_arrow_x, h_arrows_y))
+        screen.blit(text_menu_right_arrow, (menu_right_arrow_x, h_arrows_y))
 
-        # TODO : Magick N
         # Drive indications below Arrows
-        screen.blit(
-            text_menu_drive,
-            (left_arrow_x - 20, h_arrows_y + const.TEXT_ARROW_DELTA)
-        )
-        screen.blit(
-            text_menu_drive,
-            (right_arrow_x - 30, h_arrows_y + const.TEXT_ARROW_DELTA)
-        )
+        text_menu_drive_y = h_arrows_y + const.TEXT_ARROW_DELTA
+        screen.blit(text_menu_drive, (menu_left_drive_x, text_menu_drive_y))
+        screen.blit(text_menu_drive, (menu_right_drive_x, text_menu_drive_y))
 
         # Animated ROAD
         # TODO Magick N
         screen.blit(images_menu_animation[menu_animation_index], (0, 1280))
-        menu_animation_index = (menu_animation_index+1) % 3
-
+        if (pygame.time.get_ticks() - last_animation_frame
+           > const.ANIMATION_SPEED):
+            last_animation_frame = pygame.time.get_ticks()
+            menu_animation_index = ((menu_animation_index+1)
+                                    % const.ANIMATION_IMAGES_COUNT)
 
         # Check activity to launch Demo mod
         if (pygame.time.get_ticks() - last_activity
@@ -929,7 +1017,7 @@ while 1:
             transition_state = False
             transition_opacity_step = -transition_opacity_step
 
-        # WHITE WALL
+        # BLACK WALL
         pygame.gfxdraw.box(
             screen,
             current_level.image_rect,
@@ -943,10 +1031,17 @@ while 1:
                 'LEVEL ' + str(next_level.id),
                 const.PINK, const.ALMOST_BLACK
             )
+
+            pygame.gfxdraw.box(
+                screen,
+                rect_transition_level,
+                const.ABLACK
+            )
+
             screen.blit(
                 text_level,
-                (screen_width/2
-                 - (text_level.get_width()/2), const.TEXT_LEVEL_POS)
+                (center_text(screen, text_level),
+                 const.TEXT_LEVEL_TOP)
             )
 
     # Updates screen
