@@ -6,27 +6,18 @@ import numpy as np
 import time
 
 from selenium import webdriver
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.support.ui import WebDriverWait
-# from selenium.webdriver.support import expected_conditions as EC
-
-from lxml import etree
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 
 # Construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument(
-    "-i", "--input",
-    required=True, help="path to input gpx file to be scrapped"
-)
 ap.add_argument(
     "-o", "--output",
     required=True, help="path to the directory to save scrapping results"
 )
 args = vars(ap.parse_args())
 
-# Panorama options
-pitch = 0
-fov = 90
+
 
 # 4096x2160
 width = 1920
@@ -47,36 +38,33 @@ driver = webdriver.Chrome(
     chrome_options=options
 )
 
-# Parse GPX file
-tree = etree.parse(args["input"])  # 'gpx_data/delporren2.gpx'
+# Panorama options
+pitch = 0
+fov = 90
+lat = 0
+lon = 0
+heading = 0
 
-namespaces = {'ns': 'http://www.topografix.com/GPX/1/0'}
 
-# Iterate over all locations in the gpx file
-for index, location_node in enumerate(
-        tree.xpath('//ns:trk/ns:trkseg/ns:trkpt', namespaces=namespaces),
-        start=1):
-    children = location_node.getchildren()
+url = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + \
+    f'{lat},{lon}&heading={heading}&pitch={pitch}&fov={fov}'
+
+print(url)
+
+# Get the streetview page
+driver.get(url)
+
+actions = ActionChains(driver)
+actions.click()
+
+index = 1
+
+while 1:
+
     print('-----', index, '-----')
+    print(driver.current_url)
 
-    heading = 0
-    if children:
-        heading = f'{children[0].text}'
-
-    print('lat : ', location_node.get("lat"))
-    print('lon : ', location_node.get("lon"))
-    print('hea : ', heading)
-    print('pit : ', pitch)
-    print('fov : ', fov)
-
-    url = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + \
-        f'{location_node.get("lat")},{location_node.get("lon")}' + \
-        f'&heading={heading}&pitch={pitch}&fov={fov}'
-
-    print(url)
-
-    # Get the streetview page
-    driver.get(url)
+    # element = driver.find_element_by_id("content-container")
 
     # Waiting the page to load
     time.sleep(7)
@@ -93,3 +81,11 @@ for index, location_node in enumerate(
     cv2.imwrite(f'{args["output"]}/output_2/gsv_{index}.jpg', cropped)
 
     os.remove(f'{args["output"]}/output/gsv_{index}.png')
+
+    # Move forward
+    # element.send_keys(Keys.ARROW_UP)
+    actions.send_keys(Keys.ARROW_UP)
+    actions.perform()
+    actions.reset_actions()
+
+    index += 1

@@ -40,6 +40,7 @@ def reset_game():
     global current_clue, last_activity, level_start_time
     global key_pressed_count, mapped_current_key_speed, state, max_key_speed
     global key_speed_history, total_clue_time, last_time_inside_clue
+    global tutorial_passed, reset_clue
 
     # Back to first image
     index_view = 1
@@ -54,10 +55,13 @@ def reset_game():
     current_clue = None
     total_clue_time = 0
     last_time_inside_clue = 0
+    reset_clue = False
     # Reset inactivity time
     last_activity = pygame.time.get_ticks()
     # Reset level time
     level_start_time = 0
+    # Reset tutorial
+    tutorial_passed = False
 
     # Reset difficulty when back in menu
     if state == State.MENU:
@@ -85,7 +89,7 @@ class State(Enum):
 random.seed()
 
 # Parse XML file
-tree = etree.parse('./levels.xml')
+tree = etree.parse('./levels_fr.xml')
 
 root = tree.getroot()
 
@@ -272,6 +276,7 @@ inside_clue_duration = 0
 total_clue_time = 0
 current_clue = None
 last_time_inside_clue = 0
+reset_clue = False
 
 # Subtitles
 current_subtitle_duration = const.SUBTITLE_MIN_DURATION
@@ -346,8 +351,7 @@ while 1:
             last_activity = pygame.time.get_ticks()
 
             # Left Button
-            if ((getattr(event, 'button', False) == const.LEFT_ARROW
-                    and is_dancepad_connected)
+            if (getattr(event, 'button', const.LEFT_ARROW+1) == const.LEFT_ARROW
                     or getattr(event, 'key', False) == K_k):
                 if state == State.LEVEL:
                     if btn_right_pressed:
@@ -490,8 +494,10 @@ while 1:
 
             instant_key_speed = key_pressed_count/total_time
 
-            # TODO : Magick Number
-            current_key_speed = 0.3*instant_key_speed + 0.7*avg_key_speed
+            current_key_speed = (
+                const.INSTANT_KEY_SPEED_WEIGHT*instant_key_speed
+                + const.AVG_KEY_SPEED_WEIGHT*avg_key_speed
+            )
 
             if current_key_speed > max_key_speed:
                 current_key_speed = max_key_speed
@@ -657,8 +663,9 @@ while 1:
         # INSIDE CLUE AREA
         # Checks if the main speed needle is inside the clue area
         if (speedometer_main_needle_angle_degrees >= const.CLUE_MAX_ANGLE
-           and speedometer_main_needle_angle_degrees <= const.CLUE_MIN_ANGLE):
-
+           and speedometer_main_needle_angle_degrees <= const.CLUE_MIN_ANGLE
+           and not reset_clue):
+            print('INSIDE AND NO RESET')
             # Increments the total time when already inside
             if last_time_inside_clue:
                 total_clue_time += (pygame.time.get_ticks()
@@ -681,11 +688,15 @@ while 1:
                         pass
         # OUTSIDE THE CLUE AREA
         else:
+            print('OUTSIDE OR RESET')
             last_time_inside_clue = 0
             # Decrease the clue progress when outside the area
             if not current_clue:
                 # TODO: should imply time
-                total_clue_time = max(total_clue_time-const.CLUE_DROP_SPEED, 0)
+                total_clue_time = total_clue_time-const.CLUE_DROP_SPEED
+                if total_clue_time < 0:
+                    total_clue_time = 0
+                    reset_clue = False
 
         # CLUE ENABLED : A clue has been enabled
         if current_clue:
@@ -699,8 +710,9 @@ while 1:
                 # This clue has no more subtitle
                 if not subtitle:
                     print('NO MORE SUBTITLE')
+                    total_clue_time = const.CLUE_STAY_TIME
                     current_clue = None
-                    total_clue_time = 0
+                    reset_clue = True
                     # Increase difficulty by increasing max key speed
                     max_key_speed += const.DIFFICULTY_INCREASE
                     print('MAX KEY SPEED : ', max_key_speed)
@@ -949,8 +961,11 @@ while 1:
         screen.blit(text_menu_drive, (menu_right_drive_x, text_menu_drive_y))
 
         # Animated ROAD
-        # TODO Magick N
-        screen.blit(images_menu_animation[menu_animation_index], (0, 1280))
+        screen.blit(
+            images_menu_animation[menu_animation_index],
+            (const.MENU_ANIMATION_X, const.MENU_ANIMATION_Y)
+        )
+
         if (pygame.time.get_ticks() - last_animation_frame
            > const.ANIMATION_SPEED):
             last_animation_frame = pygame.time.get_ticks()
@@ -965,7 +980,6 @@ while 1:
             print('DEMO ON LEVEL :', next_level.id)
             transition_state = State.DEMO
 
-    # TODO : Checks not in every tick perhaps ?
     # PC Power management
     if psutil.sensors_battery() is not None:
         if (not psutil.sensors_battery().power_plugged

@@ -3,6 +3,7 @@ StreetviewScrapper/chromedriver.exe
 
 # Test files
 metadrive-temp.py
+MetadriveGame/log.txt
 
 # API KEY
 StreetviewScrapper/api_key.txt
@@ -12,7 +13,8 @@ MetadriveGame/maps/
 StreetviewScrapper/maps/
 
 # SUBTITLES
-MetadriveGame/levels.xml
+MetadriveGame/levels_fr.xml
+MetadriveGame/levels_en.xml
 
 # GPX FILES
 StreetviewScrapper/gpx_data/
