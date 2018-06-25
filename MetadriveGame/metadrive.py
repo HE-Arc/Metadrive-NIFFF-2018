@@ -25,7 +25,7 @@ from clue import *
 
 
 def get_dancepad_output():
-    """ Get all inputs from dancpad and return them inside an array """
+    """ Gets all inputs from dancpad and return them inside an array """
 
     pygame.event.pump()
 
@@ -34,8 +34,25 @@ def get_dancepad_output():
     return [j.get_button(i) if i < n else 0 for i in range(max(10, n))]
 
 
+def display_animated_road():
+    """ Displays the animated road on the bottom of the screen """
+    global images_menu_animation, menu_animation_index, last_animation_frame
+    global screen
+    # Animated ROAD
+    screen.blit(
+        images_menu_animation[menu_animation_index],
+        (const.MENU_ANIMATION_X, const.MENU_ANIMATION_Y)
+    )
+
+    if (pygame.time.get_ticks() - last_animation_frame
+       > const.ANIMATION_SPEED):
+        last_animation_frame = pygame.time.get_ticks()
+        menu_animation_index = ((menu_animation_index+1)
+                                % const.ANIMATION_IMAGES_COUNT)
+
+
 def reset_game():
-    """ Reset the global variable after a level has ended """
+    """ Resets the global variable after a level has ended """
     global index_view, last_image_time, current_key_speed, current_image_speed
     global current_clue, last_activity, level_start_time
     global key_pressed_count, mapped_current_key_speed, state, max_key_speed
@@ -248,6 +265,8 @@ btn_right_pressed = True
 transition_index = 0
 transition_opacity_step = const.TRANSITION_OPACITY_DELTA
 transition_state = False
+transition_animation_enabled = False
+transition_animation_time = 0
 rect_transition_level = Rect(
     (0, const.TEXT_LEVEL_TOP - const.TEXT_DEMO_PADDING),
     (screen_width, const.TEXT_LEVEL_HEIGHT + 2*const.TEXT_DEMO_PADDING)
@@ -325,7 +344,7 @@ last_animation_frame = 0
 images_menu_animation = []
 for i in range(const.ANIMATION_IMAGES_COUNT):
     images_menu_animation.append(
-        pygame.image.load(f'images/road_{i}.tif'))
+        pygame.image.load(f'images/road_{i}.jpg'))
 
 # --------------------------------------------------------------------------
 # ------------------------------ MAIN LOOP ---------------------------------
@@ -424,6 +443,8 @@ while 1:
 
         # Time Calc
         elapsed = clock.get_time()/1000.0
+
+        print('ELAPSED', elapsed)
 
         if not last_speed_calc:
             last_speed_calc = pygame.time.get_ticks()
@@ -665,7 +686,6 @@ while 1:
         if (speedometer_main_needle_angle_degrees >= const.CLUE_MAX_ANGLE
            and speedometer_main_needle_angle_degrees <= const.CLUE_MIN_ANGLE
            and not reset_clue):
-            print('INSIDE AND NO RESET')
             # Increments the total time when already inside
             if last_time_inside_clue:
                 total_clue_time += (pygame.time.get_ticks()
@@ -688,7 +708,6 @@ while 1:
                         pass
         # OUTSIDE THE CLUE AREA
         else:
-            print('OUTSIDE OR RESET')
             last_time_inside_clue = 0
             # Decrease the clue progress when outside the area
             if not current_clue:
@@ -960,17 +979,7 @@ while 1:
         screen.blit(text_menu_drive, (menu_left_drive_x, text_menu_drive_y))
         screen.blit(text_menu_drive, (menu_right_drive_x, text_menu_drive_y))
 
-        # Animated ROAD
-        screen.blit(
-            images_menu_animation[menu_animation_index],
-            (const.MENU_ANIMATION_X, const.MENU_ANIMATION_Y)
-        )
-
-        if (pygame.time.get_ticks() - last_animation_frame
-           > const.ANIMATION_SPEED):
-            last_animation_frame = pygame.time.get_ticks()
-            menu_animation_index = ((menu_animation_index+1)
-                                    % const.ANIMATION_IMAGES_COUNT)
+        display_animated_road()
 
         # Check activity to launch Demo mod
         if (pygame.time.get_ticks() - last_activity
@@ -1015,26 +1024,46 @@ while 1:
 
         transition_index += transition_opacity_step
 
-        # Trans switch
-        if transition_index > 255:
+        # Fade-in finished
+        if transition_index >= 256:
             transition_index = 255
             transition_opacity_step = -transition_opacity_step
-            state = transition_state
             reset_game()
             print('------ GAME RESETED -------')
-            # Next level
+            # Transition goes to a level
             if transition_state in [State.LEVEL, State.DEMO]:
-                current_level = next_level
-
+                transition_animation_enabled = True
+                transition_animation_time = pygame.time.get_ticks()
+            else:
+                state = transition_state
+        # Fade-out finished
         elif transition_index < 0:
             transition_index = 0
             transition_state = False
             transition_opacity_step = -transition_opacity_step
+            transition_animation_enabled = False
+
+        black_wall_rect = current_level.image_rect
+
+        # Show road animatoin
+        if transition_animation_enabled:
+            # loading not finished
+            if (pygame.time.get_ticks() - transition_animation_time
+               < const.TRANSITION_ANIMATION_DURATION):
+                transition_index = 255
+                display_animated_road()
+                black_wall_rect = Rect(0, 0, screen_width,
+                                       screen_height-const.ANIMATION_HEIGHT)
+            # loading finished
+            else:
+                current_level = next_level
+                state = transition_state
 
         # BLACK WALL
+        print(transition_index)
         pygame.gfxdraw.box(
             screen,
-            current_level.image_rect,
+            black_wall_rect,
             (0, 0, 0, transition_index)
         )
 
