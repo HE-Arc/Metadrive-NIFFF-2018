@@ -252,6 +252,7 @@ text_time_indic_x = center_text(screen, text_time_indic)
 # General
 state = State.MENU
 shutdown_incoming = False
+shutdown_time = 0
 last_activity = 0
 index_view = 1
 saved_index_view = index_view
@@ -994,16 +995,23 @@ while 1:
 
     # PC Power management
     if psutil.sensors_battery() is not None:
-        if (not psutil.sensors_battery().power_plugged
-                and not shutdown_incoming):
-            print('POWER UNPLUGGED')
-            print('PC will be shutdown if the power remain unplugged'
-                  + ' in the next 60 seconds')
-            shutdown_incoming = True
-            os.system('shutdown -s -t 60')
-        elif psutil.sensors_battery().power_plugged and shutdown_incoming:
-            os.system('shutdown -a')
-            shutdown_incoming = False        # Draw transition
+        # Not Charging
+        if not psutil.sensors_battery().power_plugged:
+            if not shutdown_incoming:
+                print('POWER UNPLUGGED')
+                print('PC will be shutdown if the power remain unplugged '
+                      + f'in the next {const.SHUTDOWN_COUNTDOWN/1000} seconds')
+                shutdown_incoming = True
+                shutdown_time = pygame.time.get_ticks()
+            elif (pygame.time.get_ticks() - shutdown_time
+                  > const.SHUTDOWN_COUNTDOWN):
+                os.system('shutdown -s -t 0')
+        # Charging
+        else:
+            if shutdown_incoming:
+                print('POWER PLUGGED - Shutdown aborted')
+                shutdown_incoming = False
+                shutdown_time = 0
 
     # Log CPU/RAM usage
     if (not last_hardware_log
