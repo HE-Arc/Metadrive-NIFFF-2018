@@ -4,7 +4,7 @@ import math
 
 from utils import *
 
-DEBUG = True
+DEBUG = False
 
 # Main loop tick rate
 TICK_RATE = 30  # 30 tick per seconds
@@ -13,8 +13,11 @@ TICK_RATE = 30  # 30 tick per seconds
 SCREEN_HEIGHT_DEFAULT = 1920  # 640
 SCREEN_WIDTH_DEFAULT = 1080  # 640
 
+# Subtitles
+SUBTITLE_FILE = './levels_fr.xml'
+
 # Controls
-TEST_DANCEPAD = True
+TEST_DANCEPAD = False
 
 # Defaults
 UP_ARROW = 2
@@ -31,7 +34,7 @@ if TEST_DANCEPAD:
 INACTIVITY_TIME_IN_MENU = 30000  # in ms
 INACTIVITY_TIME_IN_GAME = 15000  # in ms
 DIFFICULTY_INCREASE = 1
-FULLSCREEN = False
+FULLSCREEN = True
 DELTA_TIME = 0.3  # in seconds
 DECELERATION_POWER = -7  # Slow down speed by N images per second
 ACCELERATION_POWER = 4  # Speed goes up by N images per second
@@ -39,7 +42,7 @@ ACCELERATION_POWER = 4  # Speed goes up by N images per second
 KEY_SPEED_HISTO_LENGTH = 3
 
 # Icon and window title
-ICON_IMAGE = "images/"
+ICON_IMAGE = "images/icon.ico"
 WINDOW_TITLE = "Metadrive"
 
 # Colors
@@ -69,7 +72,7 @@ MAX_IMAGE_SPEED = 20
 
 # Speedometer
 SPEEDOMETER_CENTER_X = 230
-SPEEDOMETER_CENTER_Y = 1650  # 600
+SPEEDOMETER_CENTER_Y = 1660  # 600
 SPEEDOMETER_RADIUS = 150
 SPEEDOMETER_EXTERN_RADIUS = int(SPEEDOMETER_RADIUS * 1.1)
 

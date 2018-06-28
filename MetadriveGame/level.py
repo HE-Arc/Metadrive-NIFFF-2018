@@ -15,19 +15,11 @@ class Level:
         self.images_count = images_count
         self.duration = duration
         self.path = path
-        self.images_cache = []
-        self.images_cache.append('empty')
         self.new_clue_list = []
         self.old_clue_list = []
 
         # Adding this level to the level list
         Level.level_list.append(self)
-
-        # Caching specified images
-        self.load_images(self.path)
-
-        # Rect for one image
-        self.image_rect = self.images_cache[1].get_rect()
 
         # Increment static value for next level
         Level.id += 1
@@ -51,11 +43,3 @@ class Level:
         self.new_clue_list = self.new_clue_list + self.old_clue_list
         for clue in self.new_clue_list:
             clue.reset()
-
-    def load_images(self, path):
-        """ Load given images into a list """
-        for i in range(self.images_count):
-            index = i + 1
-            print('Image ', index, ' added to level ', self.id)
-            self.images_cache.append(
-                pygame.image.load(f'maps/{self.path}/gsv_{index}.jpg'))

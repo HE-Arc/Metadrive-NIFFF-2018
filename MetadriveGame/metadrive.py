@@ -106,7 +106,7 @@ class State(Enum):
 random.seed()
 
 # Parse XML file
-tree = etree.parse('./levels_fr.xml')
+tree = etree.parse(const.SUBTITLE_FILE)
 
 root = tree.getroot()
 
@@ -155,8 +155,8 @@ if pygame.joystick.get_count() > 0:
 pygame.event.set_allowed([QUIT, KEYDOWN])
 
 # Icon
-# icone = pygame.image.load(const.ICON_IMAGE)
-# pygame.display.set_icon(icone)
+icon = pygame.image.load(const.ICON_IMAGE)
+pygame.display.set_icon(icon)
 
 # Window title
 pygame.display.set_caption(const.WINDOW_TITLE)
@@ -177,7 +177,7 @@ screen = pygame.display.set_mode([screen_width, screen_height], flags)
 screen_center_x = screen_width/2
 
 # Mouse
-# pygame.mouse.set_visible(False)
+pygame.mouse.set_visible(False)
 
 # Clock
 clock = pygame.time.Clock()
@@ -342,6 +342,7 @@ print(
 menu_animation_index = 0
 last_animation_frame = 0
 images_menu_animation = []
+fullscreen_rect = Rect(0, 0, screen_width, screen_height)
 for i in range(const.ANIMATION_IMAGES_COUNT):
     images_menu_animation.append(
         pygame.image.load(f'images/road_{i}.jpg'))
@@ -495,8 +496,10 @@ while 1:
 
         # Draw image
         screen.blit(
-            current_level.images_cache[last_index_view],
-            current_level.image_rect
+            pygame.image.load(
+                f'maps/{current_level.path}/gsv_{last_index_view}.bmp'
+            ),
+            (0, 0)
         )
 
         # Calculating speeds
@@ -505,7 +508,7 @@ while 1:
             print('real speed : ', (index_view - saved_index_view)/total_time)
             saved_index_view = index_view
 
-            # DYNAMIC DIFFICULTY
+            # Smoothing key input
             key_speed_history.popleft()
             key_speed_history.append(key_pressed_count)
 
@@ -997,9 +1000,9 @@ while 1:
             print('PC will be shutdown if the power remain unplugged'
                   + ' in the next 60 seconds')
             shutdown_incoming = True
-            # os.system('shutdown -s -t 60')
+            os.system('shutdown -s -t 60')
         elif psutil.sensors_battery().power_plugged and shutdown_incoming:
-            # os.system('shutdown -a')
+            os.system('shutdown -a')
             shutdown_incoming = False        # Draw transition
 
     # Log CPU/RAM usage
@@ -1043,7 +1046,7 @@ while 1:
             transition_opacity_step = -transition_opacity_step
             transition_animation_enabled = False
 
-        black_wall_rect = current_level.image_rect
+        black_wall_rect = fullscreen_rect
 
         # Show road animatoin
         if transition_animation_enabled:
@@ -1060,7 +1063,6 @@ while 1:
                 state = transition_state
 
         # BLACK WALL
-        print(transition_index)
         pygame.gfxdraw.box(
             screen,
             black_wall_rect,
@@ -1068,10 +1070,11 @@ while 1:
         )
 
         # LEVEL TEXT
-        if transition_state == State.LEVEL:
+        if transition_state in [State.LEVEL, State.DEMO]:
+            transition_text = 'LEVEL ' + str(next_level.id) if transition_state == State.LEVEL else 'DEMO'
             text_level = textOutline(
                 demo_font,
-                'LEVEL ' + str(next_level.id),
+                transition_text,
                 const.PINK, const.ALMOST_BLACK
             )
 
