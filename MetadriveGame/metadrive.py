@@ -402,7 +402,7 @@ while 1:
                     or getattr(event, 'key', False) == K_o):
                 if state == State.LEVEL:
                     pass
-                elif state == State.MENU:
+                elif state == State.MENU and not transition_state:
                     # Previous level
                     next_level = Level.level_list[
                         (Level.level_list.index(next_level) - 1)
@@ -414,7 +414,7 @@ while 1:
                     or getattr(event, 'key', False) == K_m):
                 if state == State.LEVEL:
                     transition_state = State.MENU
-                elif state == State.MENU:
+                elif state == State.MENU and not transition_state:
                     # Next level
                     next_level = Level.level_list[
                         (Level.level_list.index(next_level) + 1)
