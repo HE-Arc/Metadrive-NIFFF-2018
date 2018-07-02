@@ -70,11 +70,10 @@ def reset_game():
     # Reset tutorial
     tutorial_passed = False
 
-    # Reset difficulty when back in menu
-    if state == State.MENU:
-        max_key_speed = const.DEFAULT_MAX_KEY_SPEED
-        key_speed_history = deque([const.MIN_KEY_SPEED]
-                                  * len(key_speed_history))
+    # Reset difficulty
+    max_key_speed = const.DEFAULT_MAX_KEY_SPEED
+    key_speed_history = deque([const.MIN_KEY_SPEED]
+                              * len(key_speed_history))
 
 # --------------------------------------------------------------------------
 # ------------------------------- CLASSES ----------------------------------
