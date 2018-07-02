@@ -4,14 +4,18 @@ import math
 
 from utils import *
 
+# --------------------------------------------------------------------------
+# ---------------------------- MAIN SETTINGS -------------------------------
+# --------------------------------------------------------------------------
+
 DEBUG = False
 
 # Main loop tick rate
-TICK_RATE = 30  # 30 tick per seconds
+TICK_RATE = 45  # ticks per seconds
 
 # Default window size
-SCREEN_HEIGHT_DEFAULT = 1920  # 640
-SCREEN_WIDTH_DEFAULT = 1080  # 640
+SCREEN_HEIGHT_DEFAULT = 1920
+SCREEN_WIDTH_DEFAULT = 1080
 
 # Subtitles
 SUBTITLE_FILE = './levels_fr.xml'
@@ -19,13 +23,13 @@ SUBTITLE_FILE = './levels_fr.xml'
 # Controls
 TEST_DANCEPAD = False
 
-# Defaults
+# Defaults keys binding
 UP_ARROW = 2
 LEFT_ARROW = 0
 DOWN_ARROW = 3
 RIGHT_ARROW = 1
 
-# Chinese dancepad
+# Chinese dancepad binding
 if TEST_DANCEPAD:
     DOWN_ARROW = 1
     RIGHT_ARROW = 3
@@ -41,6 +45,19 @@ DECELERATION_POWER = -7  # Slow down speed by N images per second
 ACCELERATION_POWER = 4  # Speed goes up by N images per second
 
 KEY_SPEED_HISTO_LENGTH = 3
+
+# Speed
+MIN_KEY_SPEED = 0
+DEFAULT_MAX_KEY_SPEED = 8
+INSTANT_KEY_SPEED_WEIGHT = 0.3
+AVG_KEY_SPEED_WEIGHT = 0.7
+
+MIN_IMAGE_SPEED = 0.3
+MAX_IMAGE_SPEED = 20
+
+# --------------------------------------------------------------------------
+# ---------------------------------- HUD -----------------------------------
+# --------------------------------------------------------------------------
 
 # Icon and window title
 ICON_IMAGE = "images/icon.ico"
@@ -59,21 +76,9 @@ PINK = (235, 62, 149)
 ALIGHTPINK = (255, 107, 181)
 MENU_BLUE = (33, 183, 224)
 
-# Speed
-MIN_KEY_SPEED = 0
-DEFAULT_MAX_KEY_SPEED = 8
-INSTANT_KEY_SPEED_WEIGHT = 0.3
-AVG_KEY_SPEED_WEIGHT = 0.7
-
-MIN_IMAGE_SPEED = 0.3
-MAX_IMAGE_SPEED = 20
-
-
-# HUD
-
 # Speedometer
 SPEEDOMETER_CENTER_X = 230
-SPEEDOMETER_CENTER_Y = 1660  # 600
+SPEEDOMETER_CENTER_Y = 600  # 600
 SPEEDOMETER_RADIUS = 150
 SPEEDOMETER_EXTERN_RADIUS = int(SPEEDOMETER_RADIUS * 1.1)
 
@@ -121,7 +126,7 @@ for i in range(SPEEDOMETER_NUMBER_OF_MARKS):
 
 # Clues
 CLUE_STAY_TIME = 3000  # ms
-CLUE_DROP_SPEED = 100
+CLUE_DROP_SPEED = 100  # must be between 0 and CLUE_STAY_TIME
 CLUE_RANGE_MIN = 3./8  # Start Percent of speedometer global angle
 CLUE_RANGE_MAX = 5./8  # End Percent of speedometer global angle
 CLUE_RADIUS = int(SPEEDOMETER_RADIUS * 0.9)

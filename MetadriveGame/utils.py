@@ -37,41 +37,6 @@ def textOutline(font, message, fontcolor, outlinecolor):
     return img
 
 
-def map_key_speed_to_image_speed(
-        min_key_speed,
-        max_key_speed,
-        min_image_speed,
-        max_image_speed,
-        current_key_speed):
-    """ Convert a key speed in a range to an image speed also in a range """
-    slow_image_speed_percent = 0.4
-    slow_key_speed_percent = 0.8
-    real_delta_image_speed = max_image_speed - min_image_speed
-    slow_delta_image_speed = real_delta_image_speed * slow_image_speed_percent
-    fast_delta_image_speed = (real_delta_image_speed
-                              * (1-slow_image_speed_percent))
-
-    real_delta_key_speed = max_key_speed - min_key_speed
-    ratio = current_key_speed / real_delta_key_speed
-
-    if ratio <= slow_key_speed_percent:
-
-        ratio = (current_key_speed
-                 / (real_delta_key_speed * slow_key_speed_percent))
-
-        current_image_speed = ((ratio * slow_delta_image_speed)
-                               + min_image_speed)
-    else:
-        ratio = ((current_key_speed
-                  - (real_delta_key_speed * slow_key_speed_percent))
-                 / (real_delta_key_speed * (1-slow_key_speed_percent)))
-
-        current_image_speed = ((ratio * fast_delta_image_speed)
-                               + min_image_speed
-                               + slow_delta_image_speed)
-    return current_image_speed
-
-
 def map_range_to_range(min_a, max_a, min_b, max_b, value_a):
     """ Convert a value in a range to another value also in a range """
     ratio = value_a / (max_a - min_a)
@@ -112,8 +77,6 @@ def draw_aa_pie(surface, points, color, filled=True):
     if filled:
         pygame.gfxdraw.filled_polygon(surface, points, color)
     pygame.gfxdraw.aapolygon(surface, points, color)
-    # pygame.gfxdraw.arc(surface, center_x, center_y, radius, -angle_b,
-    #                    -angle_a, color)
 
 
 def center_text(surface, text):

@@ -24,16 +24,6 @@ from clue import *
 # --------------------------------------------------------------------------
 
 
-def get_dancepad_output():
-    """ Gets all inputs from dancpad and return them inside an array """
-
-    pygame.event.pump()
-
-    n = j.get_numbuttons()
-    # Read input from buttons and return a list with the state of all buttons
-    return [j.get_button(i) if i < n else 0 for i in range(max(10, n))]
-
-
 def display_animated_road():
     """ Displays the animated road on the bottom of the screen """
     global images_menu_animation, menu_animation_index, last_animation_frame
@@ -141,7 +131,6 @@ pygame.init()
 
 # Dance pad Initialisation
 pygame.joystick.init()
-
 is_dancepad_connected = False
 
 if pygame.joystick.get_count() > 0:
@@ -149,7 +138,6 @@ if pygame.joystick.get_count() > 0:
     j.init()
     is_dancepad_connected = True
     print('Initialized Joystick : ', j.get_name())
-
 
 # Events
 pygame.event.set_allowed([QUIT, KEYDOWN])
@@ -181,6 +169,8 @@ pygame.mouse.set_visible(False)
 
 # Clock
 clock = pygame.time.Clock()
+
+# ------------------------------ FONTS & TEXTS --------------------------------
 
 # Fonts
 font_path = "./fonts/terminal-grotesque.ttf"
@@ -248,6 +238,8 @@ text_time_indic = textOutline(
     base_font, 'REMAINING TIME', const.PINK, const.ALMOST_BLACK
 )
 text_time_indic_x = center_text(screen, text_time_indic)
+
+# ----------------------------- MAIN VARIABLES --------------------------------
 
 # General
 state = State.MENU
@@ -446,8 +438,6 @@ while 1:
         # Time Calc
         elapsed = clock.get_time()/1000.0
 
-        print('ELAPSED', elapsed)
-
         if not last_speed_calc:
             last_speed_calc = pygame.time.get_ticks()
 
@@ -508,6 +498,7 @@ while 1:
 
             print('real speed : ', (index_view - saved_index_view)/total_time)
             saved_index_view = index_view
+            print('ELAPSED', elapsed)
 
             # Smoothing key input
             key_speed_history.popleft()
@@ -515,7 +506,6 @@ while 1:
 
             avg_key_speed = (sum(key_speed_history)
                              / (const.KEY_SPEED_HISTO_LENGTH*const.DELTA_TIME))
-            print('AVG -- : ', avg_key_speed)
 
             instant_key_speed = key_pressed_count/total_time
 
@@ -560,7 +550,7 @@ while 1:
                 acceleration
                 * (elapsed/(last_total_time/const.DELTA_TIME))
             )
-            # Fixes the limits
+            # Defines the limits
             if current_image_speed > const.MAX_IMAGE_SPEED:
                 current_image_speed = const.MAX_IMAGE_SPEED
             elif current_image_speed < const.MIN_IMAGE_SPEED:
@@ -648,7 +638,7 @@ while 1:
                 tutorial_passed = True
 
         if const.DEBUG:
-            # REAMINING DISTANCE
+            # ------------------------ REAMINING DISTANCE ---------------------
             remaining_dist = max(current_level.images_count - index_view, 0)
             text_dist_remaining = textOutline(
                 base_font,
@@ -661,7 +651,7 @@ while 1:
                 (const.TEXT_DISTANCE_LEFT, const.TEXT_DISTANCE_TOP)
             )
 
-        # REMAINING TIME
+        # --------------------------- REMAINING TIME --------------------------
         # Level has nearly timed out
         if level_remaining_time <= 10 and level_remaining_time > 0:
 
@@ -683,7 +673,7 @@ while 1:
                 (text_time_indic_x, const.TEXT_TIME_INDIC_TOP)
             )
 
-        # CLUES
+        # -------------------------------- CLUES ------------------------------
 
         # INSIDE CLUE AREA
         # Checks if the main speed needle is inside the clue area
@@ -764,27 +754,28 @@ while 1:
                 pygame.gfxdraw.box(screen, bg_rect, const.ABLACK)
                 screen.blit(subtitle_text, pos)
 
-        # SPEEDOMETER
-        speedometer_main_needle_angle = get_angle_dial(
+        # --------------------------- SPEEDOMETER -----------------------------
+
+        speedometer_main_needle_angle_rad = get_angle_dial(
             const.SPEEDOMETER_GLOBAL_ANGLE, current_image_speed,
             const.MIN_IMAGE_SPEED, const.MAX_IMAGE_SPEED
         )
         speedometer_main_needle_end_x = (
             const.SPEEDOMETER_CENTER_X
-            + (math.cos(speedometer_main_needle_angle)
+            + (math.cos(speedometer_main_needle_angle_rad)
                * const.SPEEDOMETER_MAIN_NEEDLE_LENGHT)
         )
         speedometer_main_needle_end_y = (
             const.SPEEDOMETER_CENTER_Y
-            - (math.sin(speedometer_main_needle_angle)
+            - (math.sin(speedometer_main_needle_angle_rad)
                * const.SPEEDOMETER_MAIN_NEEDLE_LENGHT)
         )
 
         speedometer_main_needle_angle_degrees = int(
-            math.degrees(speedometer_main_needle_angle)
+            math.degrees(speedometer_main_needle_angle_rad)
         )
 
-        speedometer_future_needle_angle = get_angle_dial(
+        speedometer_future_needle_angle_rad = get_angle_dial(
             const.SPEEDOMETER_GLOBAL_ANGLE,
             mapped_current_key_speed,
             const.MIN_IMAGE_SPEED, const.MAX_IMAGE_SPEED
@@ -824,28 +815,28 @@ while 1:
         # Display Acceleration and Deceleration between needles
 
         # Angle between needle
-        delta_needle = (speedometer_future_needle_angle
-                        - speedometer_main_needle_angle)
+        delta_needle = (speedometer_future_needle_angle_rad
+                        - speedometer_main_needle_angle_rad)
 
         # Angles in degrees and inverted
         #  ... arc function doesnt use geometric sense
         speedometer_main_needle_degrees = -int(
-            math.degrees(speedometer_main_needle_angle)
+            math.degrees(speedometer_main_needle_angle_rad)
         )
         speedometer_future_needle_degrees = -int(
-            math.degrees(speedometer_future_needle_angle)
+            math.degrees(speedometer_future_needle_angle_rad)
         )
 
         if const.DEBUG:
 
             speedometer_future_needle_end_x = (
                 const.SPEEDOMETER_CENTER_X
-                + (math.cos(speedometer_future_needle_angle)
+                + (math.cos(speedometer_future_needle_angle_rad)
                    * const.SPEEDOMETER_FUTURE_NEEDLE_LENGHT)
             )
             speedometer_future_needle_end_y = (
                 const.SPEEDOMETER_CENTER_Y
-                - (math.sin(speedometer_future_needle_angle)
+                - (math.sin(speedometer_future_needle_angle_rad)
                    * const.SPEEDOMETER_FUTURE_NEEDLE_LENGHT))
 
             if(delta_needle < 0):
@@ -943,7 +934,7 @@ while 1:
              const.TEXT_MAIN_TITLE_TOP)
         )
 
-        # Levels
+        # Level selection
         for i, level in enumerate(Level.level_list):
             if level == next_level:
                 font_level = selected_font
@@ -993,7 +984,10 @@ while 1:
             print('DEMO ON LEVEL :', next_level.id)
             transition_state = State.DEMO
 
-    # PC Power management
+    # -------------------------------------------------------------------------
+    # -------------------- LAPTOP POWER MANAGEMENT & LOGS ---------------------
+    # -------------------------------------------------------------------------
+
     if psutil.sensors_battery() is not None:
         # Not Charging
         if not psutil.sensors_battery().power_plugged:
@@ -1030,7 +1024,9 @@ while 1:
         log_file.write(f'{now} | CPU : {cpu_percent} | RAM : {ram_percent}\n')
         log_file.close()
 
-    # Transition Management
+    # -------------------------------------------------------------------------
+    # -------------------------- TRANSITION MANAGEMENT ------------------------
+    # -------------------------------------------------------------------------
     if transition_state:
 
         transition_index += transition_opacity_step
@@ -1056,7 +1052,7 @@ while 1:
 
         black_wall_rect = fullscreen_rect
 
-        # Show road animatoin
+        # Show road animation
         if transition_animation_enabled:
             # loading not finished
             if (pygame.time.get_ticks() - transition_animation_time
@@ -1077,7 +1073,7 @@ while 1:
             (0, 0, 0, transition_index)
         )
 
-        # LEVEL TEXT
+        # LEVEL INDICATION TEXT
         if transition_state in [State.LEVEL, State.DEMO]:
             transition_text = 'LEVEL ' + str(next_level.id) if transition_state == State.LEVEL else 'DEMO'
             text_level = textOutline(
@@ -1098,5 +1094,5 @@ while 1:
                  const.TEXT_LEVEL_TOP)
             )
 
-    # Updates screen
+    # Updates entire screen
     pygame.display.flip()
