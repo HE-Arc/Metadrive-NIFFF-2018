@@ -5,7 +5,7 @@ Expérience (jeu) dont le but est de parcourir des trajets de films fantastiques
 ---
 
 # Utilisation
-**Important : **
+**Important :** 
 
 Le clonage seul de ce projet ne fournit pas tous les fichiers (ressources) nécessaires au bon fonctionnement de l'application.
 
