@@ -67,7 +67,7 @@ python metadrive.py
 
 Les commandes au clavier sont les touches "O", "K", "L" et "M".
 
-**Important :** L'application est faite pour être affichée en plein écran sur un moniteur vertical en 1080x1920.
+**Important :** L'application est faite pour être affichée en plein écran sur un moniteur vertical en 1080x1920. Il est donc recommandé modifier l'orientation de son écran avec un driver ou depuis les paramètres Windows afin d'éviter tout problème.
 
 ### Constantes et paramètres
 
