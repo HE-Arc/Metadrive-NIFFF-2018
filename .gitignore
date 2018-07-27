@@ -7,11 +7,6 @@ MetadriveGame/log.txt
 # API KEY
 StreetviewScrapper/api_key.txt
 
-# MAPS
-MetadriveGame/maps/
-StreetviewScrapper/maps/output/
-StreetviewScrapper/maps/output_2/
-
 # Created by https://www.gitignore.io/api/virtualenv
 
 ### VirtualEnv ###
