@@ -5,11 +5,11 @@ Expérience (jeu) dont le but est de parcourir des trajets de films fantastiques
 ---
 
 # Utilisation
-**Important :** 
+**Important :**
 
 Le clonage seul de ce projet ne fournit pas tous les fichiers (ressources) nécessaires au bon fonctionnement de l'application.
 
-Seules les images constituant les parcours ne sont pas sur le dépot, vous pouvez fournir vos propres images à l'application ou télécharger celle proposées plus bas.
+Seules les images constituant les parcours ne sont pas sur le dépôt, vous pouvez fournir vos propres images à l'application ou télécharger celle proposées plus bas.
 
 ## Prérequis
 
@@ -53,7 +53,7 @@ Normalement toutes les dépendances liées à cette partie du projet devraient m
 
 Avant d'exécuter le script, il est nécessaire d'alimenter le dossier d'images des niveaux. Le jeu attend les images dans le dossier *maps* respectivement dans les répertoires indiqués dans les fichier XML *levels_en.xml* et *levels_fr.xml*. Les noms des dossiers (`path`) et nombres d'images (`distance`) doivent être respectés.
 
-La version de base fournie ne contient pas d'images et le dossier *maps* est vide. Libre à vous d'ajuster les fichiers XML et mettre vos propre images ou de télécharger l'archive suivante contenant les 3600 images (~ 10 Go) du projet.
+La version de base fournie ne contient pas d'images et le dossier *maps* est vide. Libre à vous d'ajuster les fichiers XML et mettre vos propres images ou de télécharger l'archive suivante contenant les 3600 images (~ 10 Go) du projet.
 
 [Télécharger l'archive contenant les 3600 images (~10 Go)](https://drive.google.com/file/d/1a8FztGNd4WexBjrNIX84hnoZ0cWFca2S/view?usp=sharing)
 
@@ -67,7 +67,7 @@ python metadrive.py
 
 Les commandes au clavier sont les touches "O", "K", "L" et "M".
 
-**Important :** L'application est faite pour être affichée en plein écran sur un moniteur vertical en 1080x1920. Il est donc recommandé modifier l'orientation de son écran avec un driver ou depuis les paramètres Windows afin d'éviter tout problème.
+**Important :** L'application est faite pour être affichée en plein écran sur un moniteur vertical en 1080x1920. Il est donc recommandé de modifier l'orientation de son écran avec un driver ou depuis les paramètres Windows afin d'éviter tout problème.
 
 ### Constantes et paramètres
 
@@ -106,7 +106,7 @@ python scrapper_selenium.py -i ./gpx_data/gpx_file.gpx -o ./maps/
 
 ### scrapper_selenium_straight.py
 
-Cette version est destinée à la récupération spécifique de la route du troisième niveau puisque ce dernier dispose d'une densité d'image très faible. Cependant, il est possible d'en récupérer d'avantage en se déplaçant directement avec les flèches dans Street View.
+Cette version est destinée à la récupération spécifique de la route du troisième niveau puisque ce dernier dispose d'une densité d'image très faible. Cependant, il est possible d'en récupérer davantage en se déplaçant directement avec les flèches dans Street View.
 
 C'est pourquoi cette version ne requiert qu'un seul point de départ (inscrit directement dans le script) sous forme de longitude et latitude. Ce script fonctionne uniquement sur les lignes droites puisque l'orientation de la caméra reste fixe sur toute la durée de la capture.
 
