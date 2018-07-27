@@ -1,0 +1,440 @@
+<?xml version = "1.0" encoding="UTF-8" standalone="yes" ?>
+<levels>
+  <level path="level_1_bmp" duration="110" distance="1175">
+    <clues>
+      <clue>
+        <sub>So here's what:</sub>
+        <sub>You slip me a bottle of bourbon...</sub>
+        <sub>...a little glass and some ice.</sub>
+        <sub>You can do that, can't you, Lloyd?</sub>
+        <sub>You're not too busy, are you?</sub>
+        <sub>No, sir. I'm not busy at all.</sub>
+        <sub>Good man.</sub>
+      </clue>
+      <clue>
+        <sub>This is our Colorado Lounge.</sub>
+        <sub>It's beautiful.</sub>
+        <sub>My God!</sub>
+        <sub>This place is fantastic, isn't it, hon?</sub>
+        <sub>It sure is.</sub>
+      </clue>
+      <clue>
+        <sub>Any ideas yet?</sub>
+        <sub>Lots of ideas.</sub>
+        <sub>No good ones.</sub>
+        <sub>Something will come.</sub>
+      </clue>
+      <clue>
+        <sub>- Isn't it beautiful?</sub>
+        <sub>Yeah.</sub>
+        <sub>It's so pretty.</sub>
+        <sub>Yeah.</sub>
+        <sub>I didn't think it was going to be...</sub>
+        <sub>this big. Did you?</sub>
+        <sub>Nope.</sub>
+      </clue>
+      <clue>
+        <sub>I had the most...</sub>
+        <sub>...terrible nightmare I ever had.</sub>
+        <sub>- It was the most horrible dream.</sub>
+        <sub>- It's okay, it's okay now.</sub>
+        <sub>Really.</sub>
+      </clue>
+      <clue>
+        <sub>It's the biggest place I ever seen.</sub>
+        <sub>This whole place is such an enormous maze.</sub>
+        <sub>I'll have to leave a trail of</sub>
+        <sub>breadcrumbs every time I come in.</sub>
+        <sub>Don't let it get you down.</sub>
+      </clue>
+      <clue>
+        <sub>Do you have the slightest idea...</sub>
+        <sub>...what a moral and ethical principal is?</sub>
+        <sub>Do you?!</sub>
+        <sub>Has it ever occurred to you what</sub>
+        <sub>would happen to my future...</sub>
+        <sub>...if I fail to live up to my responsibilities?</sub>
+      </clue>
+      <clue>
+        <sub>I want you to like it here.</sub>
+        <sub>I wish we could stay here forever...</sub>
+        <sub>...and ever...</sub>
+        <sub>...and ever.</sub>
+      </clue>
+      <clue>
+        <sub>That's swell.</sub>
+        <sub>I like you, Lloyd.</sub>
+        <sub>I always liked you.</sub>
+        <sub>You were always the best of them.</sub>
+        <sub>Best goddamned bartender...</sub>
+        <sub>...from Timbuktu to Portland, Maine.</sub>
+        <sub>Or Portland, Oregon, for that matter.</sub>
+        <sub>- Thank you for saying so.</sub>
+      </clue>
+      <clue>
+        <sub>I did hurt him once, okay?</sub>
+        <sub>It was an accident.</sub>
+        <sub>Completely unintentional.</sub>
+        <sub>It could have happened to anybody.</sub>
+        <sub>And it was three goddamn years ago!</sub>
+      </clue>
+    </clues>
+  </level>
+  <level path="level_2_bmp" duration="110" distance="1143">
+    <clues>
+      <clue>
+        <sub>What is that?</sub>
+        <sub>A videotape.</sub>
+        <sub>I found it outside on the steps.</sub>
+        <sub>Who's it from?</sub>
+        <sub>I don't know.</sub>
+        <sub>There isn't anything on the envelope.</sub>
+        <sub>Does it say anything on the tape?</sub>
+        <sub>No. Nothing.</sub>
+        <sub>Well, see what's on it.</sub>
+      </clue>
+      <clue>
+        <sub>We've met before, haven't we?</sub>
+        <sub>I don't think so.</sub>
+        <sub>Where was it you think we met?</sub>
+        <sub>At your house. Don't you remember?</sub>
+        <sub>No. No, I don't.</sub>
+        <sub>Are you sure?</sub>
+        <sub>Of course.</sub>
+        <sub>As a matter of fact, I'm there right now.</sub>
+      </clue>
+      <clue>
+        <sub>You're where right now?</sub>
+        <sub>At your house.</sub>
+        <sub>That's fucking crazy, man.</sub>
+        <sub>Call me.</sub>
+        <sub>Dial your number.</sub>
+        <sub>Go ahead.</sub>
+        <sub>I told you I was here.</sub>
+        <sub>How'd you do that?</sub>
+        <sub>Ask me.</sub>
+        <sub>How'd you get inside my house?</sub>
+      </clue>
+      <clue>
+        <sub>I told you to stay in the car.</sub>
+        <sub>Why? What is it?</sub>
+        <sub>Why did you make me stay out here?</sub>
+        <sub>I'll tell you why, because I thought...</sub>
+        <sub>someone was inside the house.</sub>
+        <sub>Was there?</sub>
+      </clue>
+      <clue>
+        <sub>Fred, where are you?</sub>
+        <sub>Renee.</sub>
+        <sub>Renee.</sub>
+        <sub>Sit down, Killer.</sub>
+        <sub>I didn't kill her.</sub>
+        <sub>Tell me I didn't kill her.</sub>
+        <sub>We, the jury, find the defendant...</sub>
+        <sub>guilty of murder in the first degree.</sub>
+      </clue>
+      <clue>
+        <sub>It's...my head.</sub>
+        <sub>You sleeping OK?</sub>
+        <sub>No.</sub>
+        <sub>I can't sleep.</sub>
+        <sub>You'll sleep now.</sub>
+        <sub>Take him back to his cell.</sub>
+      </clue>
+      <clue>
+        <sub>Pull it over, but keep it running.</sub>
+        <sub>Best goddamn ears in town.</sub>
+        <sub>Give that a try.</sub>
+        <sub>Beautiful...Smooth as...</sub>
+        <sub>shit from a duck's ass.</sub>
+        <sub>Let's take a ride.</sub>
+        <sub>- Whatever you say, Mr. Eddy.</sub>
+      </clue>
+      <clue>
+        <sub>Shit. That cocksucker doing...</sub>
+        <sub>what I think he's doing?</sub>
+
+        <sub>This is where mechanical excellence...</sub>
+
+        <sub>...and 1400 horsepower pays off.</sub>
+
+        <sub>Ahh...Oh, oh, God.</sub>
+
+        <sub>Don't you ever fucking tailgate.</sub>
+
+        <sub>Ever.</sub>
+        <sub>- Tell him you won't tailgate.</sub>
+
+        <sub>Ever.</sub>
+
+        <sub>I won't ever...</sub>
+
+        <sub>Do you know how many fucking</sub>
+        <sub>car lengths it takes...</sub>
+
+        <sub>...to stop a car at 35 miles an hour?.</sub>
+
+        <sub>6 fucking car lengths.</sub>
+        <sub>That's 106 fucking feet, Mister.</sub>
+
+        <sub>If I had to stop suddenly, ...</sub>
+        <sub>you would've hit me.</sub>
+      </clue>
+      <clue>
+        <sub>I want you to get a fucking driver's manual.</sub>
+        <sub>I want you to study that motherfucker.</sub>
+
+        <sub>And I want you to obey the goddamn rules.</sub>
+
+
+        <sub>50 fucking thousand people were...</sub>
+        <sub>killed on the highway last</sub>
+
+        <sub>Because of fucking assholes like you.</sub>
+
+        <sub>Tell me you're going to get a manual.</sub>
+        <sub>- I will ge-get a manual.</sub>
+
+        <sub>Fucking ldiot.</sub>
+      </clue>
+      <clue>
+        <sub>You like pornos?</sub>
+
+        <sub>Pornos?</sub>
+        <sub>- Give you a boner?</sub>
+
+        <sub>Uh, No, No thanks. No.</sub>
+
+        <sub>Suit yourself, champ.</sub>
+
+        <sub>Well, Uh, I-I'll see you then.</sub>
+        <sub>- You will.</sub>
+
+      </clue>
+      <clue>
+        <sub>I can't see you tonight.</sub>
+        <sub>OK.</sub>
+        <sub>I have to go somewhere with Mr. Eddy.</sub>
+        <sub>Sure.</sub>
+      </clue>
+      <clue>
+        <sub>The police called us.</sub>
+
+        <sub>What'd they want?</sub>
+
+        <sub>They want to know if we had a chance...</sub>
+
+        <sub>...to find out what happened</sub>
+        <sub>to you the other night.</sub>
+
+        <sub>And they want to know</sub>
+        <sub>if you remembered anything.</sub>
+
+        <sub>But I don't remember anything.</sub>
+      </clue>
+      <clue>
+        <sub>I'm sure you noticed that girl</sub>
+        <sub>who was with me the other day.</sub>
+
+        <sub>Good looking Blonde.</sub>
+        <sub>She stayed in the car.</sub>
+
+        <sub>Her name is Alice. I swear,</sub>
+        <sub>I love that girl to death.</sub>
+
+        <sub>If I ever found out</sub>
+        <sub>somebody was making out with her...</sub>
+
+        <sub>I'd take this...</sub>
+
+        <sub>...and I'd shove it so far up his ass,</sub>
+        <sub>it would come out his mouth.</sub>
+
+        <sub>And then you know what I'd do?</sub>
+        <sub>- What?</sub>
+
+        <sub>I'd blow his fucking brains out.</sub>
+      </clue>
+      <clue>
+        <sub>Meet me at the Starlight Hotel</sub>
+        <sub>on Sycamore in 20 minutes.</sub>
+
+        <sub>He'll kill us.</sub>
+
+        <sub>Are you...</sub>
+
+        <sub>...positive that he knows?</sub>
+
+        <sub>I'm not positive, but he knows.</sub>
+      </clue>
+      <clue>
+        <sub>I'll be upstairs with Andy.</sub>
+        <sub>The back door will be open.</sub>
+
+        <sub>Go through the kitchen into the living room.</sub>
+        <sub>There's a bar there.</sub>
+
+        <sub>At 11:15, I'll send Andy</sub>
+        <sub>down to fix me a drink.</sub>
+
+        <sub>And when he does,</sub>
+        <sub>you crack him on the head, OK?</sub>
+
+      </clue>
+      <clue>
+        <sub>- Alice who? Her name is Renee.</sub>
+
+        <sub>If she told you her name</sub>
+        <sub>is Alice, she's lying.</sub>
+
+        <sub>And your name?</sub>
+        <sub>What the fuck is your name?.</sub>
+
+        <sub>Renee?</sub>
+
+        <sub>You're coming with me.</sub>
+      </clue>
+      <clue>
+        <sub>Ed...Take a look at this.</sub>
+
+        <sub>Yeah. That's her all right.</sub>
+
+        <sub>That's Fred Madison's</sub>
+        <sub>wife with Dick Laurent.</sub>
+
+        <sub>And Mr. Dent-Head over there.</sub>
+
+        <sub>We got Pete Dayton's prints</sub>
+        <sub>all over this place.</sub>
+
+        <sub>You know what I think, Ed?</sub>
+
+        <sub>What is it, AI? What do you think?</sub>
+
+        <sub>I think there's no such</sub>
+        <sub>thing as a bad coincidence.</sub>
+      </clue>
+      <clue>
+        <sub>Dick Laurent is dead.</sub>
+
+        <sub>You don't mind that</sub>
+        <sub>I'm not coming to the club tonight?</sub>
+
+        <sub>What are you going to do?</sub>
+
+        <sub>Stay home, read.</sub>
+
+        <sub>Read?</sub>
+
+        <sub>Read?</sub>
+      </clue>
+      <clue>
+        <sub>That dog woke me.</sub>
+
+        <sub>Who the hell owns that dog?</sub>
+
+        <sub>What's that?</sub>
+
+        <sub>Another videotape.</sub>
+
+        <sub>Yes.</sub>
+      </clue>
+      <clue>
+        <sub>Let's check the hallway and the bedroom.</sub>
+
+        <sub>This is the bedroom?</sub>
+
+        <sub>You sleep here in this room.</sub>
+        <sub>Both of yous.</sub>
+
+        <sub>This is our bedroom.</sub>
+
+        <sub>There's no other bedroom?</sub>
+      </clue>
+    </clues>
+  </level>
+  <level path="level_3_bmp" duration="110" distance="1200">
+    <clues>
+      <clue>
+        <sub>Take the Greyhound bus</sub>
+        <sub>that leaves Chicago...</sub>
+        <sub>for Indianapolis at 2 and ask the driver</sub>
+        <sub>to let you off at Prairie Stop, Highway 41.</sub>
+      </clue>
+      <clue>
+        <sub>- In two days...</sub>
+        <sub>...you are due at the Ambassador East</sub>
+        <sub>in Chicago.</sub>
+        <sub>And then at the Sheraton-Johnson Hotel</sub>
+        <sub>in Rapid City, South Dakota.</sub>
+        <sub>- Not me.</sub>
+        <sub>- There's very little sense...</sub>
+        <sub>...in maintaining that you're deceiving us</sub>
+        <sub>any more than we're deceiving you.</sub>
+      </clue>
+      <clue>
+        <sub>All right. What'll I do when I get there?</sub>
+        <sub>Just wait beside the road.</sub>
+        <sub>He'll be there at 3:30.</sub>
+        <sub>- Well, how will I know him?</sub>
+        <sub>- He'll know you.</sub>
+      </clue>
+      <clue>
+        <sub>- What's the matter?</sub>
+        <sub>- Matter?</sub>
+        <sub>Yes, you seem... I don't know.</sub>
+        <sub>You seem tense.</sub>
+        <sub>You know, you better go before the police</sub>
+        <sub>run out of redcaps.</sub>
+        <sub>We'll see each other again, won't we?</sub>
+        <sub>Sometime, I'm sure.</sub>
+      </clue>
+      <clue>
+        <sub>Hi.</sub>
+        <sub>- Hot day.</sub>
+        <sub>- Seen worse.</sub>
+        <sub>Are you supposed</sub>
+        <sub>to be meeting someone here?</sub>
+        <sub>- Waiting for the bus. Due any minute.</sub>
+        <sub>- Oh.</sub>
+        <sub>Some of them crop-duster pilots get rich,</sub>
+        <sub>if they live long enough.</sub>
+        <sub>Yeah.</sub>
+      </clue>
+      <clue>
+        <sub>- That's funny.</sub>
+        <sub>- What?</sub>
+        <sub>That plane's dusting crops</sub>
+        <sub>where there ain't no crops.</sub>
+      </clue>
+      <clue>
+        <sub>I'm an advertising man, not a red herring.</sub>
+        <sub>I've got a job, a secretary, a mother...</sub>
+        <sub>...two ex-wives and several bartenders</sub>
+        <sub>dependent upon me...</sub>
+        <sub>...and I don't intend to disappoint</sub>
+        <sub>them all by getting myself killed.</sub>
+      </clue>
+      <clue>
+        <sub>I never discuss love</sub>
+        <sub>on an empty stomach.</sub>
+        <sub>You've already eaten.</sub>
+        <sub>But you haven't.</sub>
+      </clue>
+      <clue>
+        <sub>Tell me. What do you do besides lure men</sub>
+        <sub>to their doom on the 20th Century Limited?</sub>
+        <sub>I'm an industrial designer.</sub>
+      </clue>
+      <clue>
+        <sub>Patience is a virtue.</sub>
+        <sub>So is breathing.</sub>
+        <sub>Just lie still.</sub>
+        <sub>Have you got any olive oil?</sub>
+        <sub>Olive oil?</sub>
+        <sub>I want to be packed in olive oil</sub>
+        <sub>if I'm gonna be a sardine.</sub>
+      </clue>
+    </clues>
+  </level>
+</levels>

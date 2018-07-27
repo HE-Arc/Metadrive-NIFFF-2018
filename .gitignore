@@ -1,11 +1,7 @@
 # Installation files
 Installation/
 
-# Chromedriver
-StreetviewScrapper/chromedriver.exe
-
 # Test files
-metadrive-temp.py
 MetadriveGame/log.txt
 
 # API KEY
@@ -13,14 +9,8 @@ StreetviewScrapper/api_key.txt
 
 # MAPS
 MetadriveGame/maps/
-StreetviewScrapper/maps/
-
-# SUBTITLES
-MetadriveGame/levels_fr.xml
-MetadriveGame/levels_en.xml
-
-# GPX FILES
-StreetviewScrapper/gpx_data/
+StreetviewScrapper/maps/output/
+StreetviewScrapper/maps/output_2/
 
 # Created by https://www.gitignore.io/api/virtualenv
 

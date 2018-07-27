@@ -17,9 +17,6 @@ ap.add_argument(
 )
 args = vars(ap.parse_args())
 
-
-
-# 4096x2160
 width = 1920
 height = 1920
 
@@ -41,8 +38,8 @@ driver = webdriver.Chrome(
 # Panorama options
 pitch = 0
 fov = 90
-lat = 0
-lon = 0
+lat = 35.70973
+lon = -119.57954
 heading = 0
 
 

@@ -130,12 +130,10 @@ pygame.init()
 
 # Dance pad Initialisation
 pygame.joystick.init()
-is_dancepad_connected = False
 
 if pygame.joystick.get_count() > 0:
     j = pygame.joystick.Joystick(0)
     j.init()
-    is_dancepad_connected = True
     print('Initialized Joystick : ', j.get_name())
 
 # Events
@@ -356,7 +354,7 @@ while 1:
         # Quit event
         if event.type == pygame.QUIT:
             sys.exit()
-        # Joystick Event
+        # Joystick or Key Event
         if event.type in (JOYBUTTONDOWN, KEYDOWN):
 
             # A button has been hit -> Reset inactivity

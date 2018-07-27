@@ -1,0 +1,346 @@
+<?xml version = "1.0" encoding="UTF-8" standalone="yes" ?>
+<levels>
+  <level path="level_1_bmp" duration="110" distance="1175">
+    <clues>
+      <clue>
+        <sub>Alors, voilà...</sub>
+        <sub>vous me filez une bouteille de bourbon...</sub>
+        <sub>un verre et de la glace.</sub>
+        <sub>C'est possible ?</sub>
+        <sub>Vous n'êtes pas débordé ?</sub>
+        <sub>Non, monsieur, pas du tout.</sub>
+        <sub>Brave garçon.</sub>
+      </clue>
+      <clue>
+        <sub>Ça, c'est notre salon Colorado.</sub>
+        <sub>Oh, il est magnifique.</sub>
+        <sub>Cet endroit est fantastique.</sub>
+        <sub>Hein, chéri ?</sub>
+        <sub>Certes.</sub>
+        <sub>Je n'ai jamais rien vu de pareil.</sub>
+      </clue>
+      <clue>
+        <sub>Tu as des idées ?</sub>
+        <sub>Des tas d'idées.</sub>
+        <sub>Aucune de bonne.</sub>
+        <sub>Ça va venir.</sub>
+      </clue>
+      <clue>
+        <sub>C'est chouette, ici, non ?</sub>
+        <sub>J'adore.</sub>
+        <sub>Vraiment.</sub>
+        <sub>Je ne me suis jamais senti...</sub>
+        <sub>aussi heureux et détendu.</sub>
+      </clue>
+      <clue>
+        <sub>Que s'est-il passé ?</sub>
+        <sub>Qu'est-ce qui ne va pas ?</sub>
+        <sub>J'ai fait...</sub>
+        <sub>le plus horrible cauchemar...</sub>
+        <sub>Le rêve le plus abominable.</sub>
+        <sub>- Calme-toi.</sub>
+        <sub>C'est fini, maintenant.</sub>
+      </clue>
+      <clue>
+        <sub>As-tu la moindre idée...</sub>
+        <sub>de ce qu'est un principe de morale,</sub>
+        <sub>une éthique ?</sub>
+        <sub>T'es-tu demandé</sub>
+        <sub>ce que serait mon avenir...</sub>
+        <sub>si je n'étais pas à la hauteur ?</sub>
+        <sub>Te l'es-tu demandé ? Hein ?</sub>
+      </clue>
+      <clue>
+        <sub>Je veux que tu te plaises ici.</sub>
+        <sub>Je souhaiterais pouvoir</sub>
+        <sub>y rester à jamais...</sub>
+        <sub>à jamais...</sub>
+        <sub>à jamais.</sub>
+      </clue>
+      <clue>
+        <sub>Je lui ai fait mal une fois,</sub>
+        <sub>d'accord.</sub>
+        <sub>Mais c'était un accident...</sub>
+        <sub>absolument involontaire.</sub>
+        <sub>Ça peut arriver.</sub>
+        <sub>Et il y a trois</sub>
+        <sub>bon Dieu d'années de ça...</sub>
+      </clue>
+      <clue>
+        <sub>Miami étouffe</sub>
+        <sub>sous une vague de chaleur...</sub>
+        <sub>Par contre, les Rocheuses</sub>
+        <sub>sont ensevelies sous la neige.</sub>
+        <sub>Du Colorado,</sub>
+        <sub>on nous communique...</sub>
+        <sub>qu'au moins trois personnes</sub>
+        <sub>sont mortes de froid.</sub>
+      </clue>
+    </clues>
+  </level>
+  <level path="level_2_bmp" duration="110" distance="1143">
+    <clues>
+      <clue>
+        <sub>Qu'est-ce que c'est?</sub>
+        <sub>Une cassette vidéo.</sub>
+        <sub>Je l'ai trouvée dehors sur les marches.</sub>
+        <sub>Qui l'envoie?</sub>
+        <sub>Je ne sais pas.</sub>
+        <sub>Rien n'est marqué sur l'enveloppe.</sub>
+        <sub>Et sur la bande?</sub>
+        <sub>Non, rien.</sub>
+        <sub>On la regarde?</sub>
+      </clue>
+      <clue>
+        <sub>On s'est déjà rencontrés, n'est-ce pas?</sub>
+        <sub>Je ne crois pas.</sub>
+        <sub>Où nous serions-nous rencontrés?</sub>
+        <sub>Chez vous. Vous ne vous rappelez pas?</sub>
+        <sub>Non, je ne me rappelle pas.</sub>
+        <sub>Vous êtes sûr?</sub>
+        <sub>Bien sûr.</sub>
+        <sub>En fait...</sub>
+        <sub>j'y suis en ce moment même.</sub>
+      </clue>
+      <clue>
+        <sub>Où êtes-vous en ce moment?</sub>
+        <sub>Chez vous.</sub>
+        <sub>C'est dément, ce truc.</sub>
+        <sub>Appelez-moi.</sub>
+        <sub>Faites votre numéro.</sub>
+        <sub>Allez-y.</sub>
+        <sub>Je vous ai dit que j'étais ici.</sub>
+        <sub>Comment avez-vous fait?</sub>
+        <sub>Demandez-le-moi.</sub>
+        <sub>Comment êtes-vous entré chez moi?</sub>
+      </clue>
+      <clue>
+        <sub>Je t'avais dit de rester dans la voiture.</sub>
+        <sub>Pourquoi?</sub>
+        <sub>Qu'est-ce qui se passe?</sub>
+        <sub>Pourquoi tu m'as fait rester dehors?</sub>
+        <sub>Parce que je pensais qu'il y avait...</sub>
+        <sub>quelqu'un dans la maison.</sub>
+        <sub>Il y avait quelqu'un?</sub>
+      </clue>
+      <clue>
+        <sub>Fred, où es-tu?</sub>
+        <sub>Bouge pas, tueur!</sub>
+        <sub>Je ne l'ai pas tuée.</sub>
+        <sub>Dites-moi que je ne l'ai pas tuée.</sub>
+        <sub>Le jury déclare l'accusé coupable...</sub>
+        <sub>de meurtre avec préméditation.</sub>
+        <sub>Fred Madison...</sub>
+        <sub>vous êtes reconnu coupable...</sub>
+        <sub>de meurtre avec préméditation.</sub>
+       </clue>
+       <clue>
+        <sub>Qu'est-ce qui va pas?</sub>
+        <sub>Ma tête.</sub>
+        <sub>Vous dormez bien?</sub>
+        <sub>Non.</sub>
+        <sub>Je n'arrive pas à dormir.</sub>
+        <sub>Maintenant, vous dormirez.</sub>
+        <sub>Ramenez-le dans sa cellule</sub>
+      </clue>
+      <clue>
+        <sub>Garez-vous, mais laissez tourner...</sub>
+        <sub>...le moteur.</sub>
+        <sub>Les meilleures oreilles de la ville.</sub>
+        <sub>Essayez de démarrer.</sub>
+        <sub>Splendide.</sub>
+        <sub>Aussi doux qu'une fiente de canard.</sub>
+        <sub>Allons faire un tour.</sub>
+        <sub>Comme vous voulez, M. Ed</sub>
+      </clue>
+      <clue>
+        <sub>Merde, cet enculé fait-il...</sub>
+        <sub>ce que je crois qu'il fait?</sub>
+        <sub>Une merveille de mécanique...</sub>
+        <sub>1400 CV, c'est là que ça paie.</sub>
+        <sub>T'avise plus jamais de coller...</sub>
+        <sub>aux pare-chocs! Jamais!</sub>
+        <sub>Dis-lui que tu ne le feras plus.</sub>
+        <sub>Je ne le...</sub>
+        <sub>Quelle distance faut-il...</sub>
+        <sub>pour arrêter une voiture à 55 km/h?</sub>
+        <sub>Six longueurs de voiture!</sub>
+        <sub>Ce qui fait 32 m 30, monsieur.</sub>
+        <sub>Si j'avais dû stopper, ...</sub>
+        <sub>tu m'aurais tamponné.</sub>
+      </clue>
+      <clue>
+        <sub>Prends un manuel de conduite...</sub>
+        <sub>et étudie-le à fond.</sub>
+        <sub>Et obéis au règlement.</sub>
+        <sub>50.000 personnes ont été tuées...</sub>
+        <sub>sur la route l'an dernier...</sub>
+        <sub>à cause de connards dans ton genre.</sub>
+        <sub>Dis que tu achèteras le manuel.</sub>
+        <sub>J'achèterai le manuel...</sub>
+        <sub>Bonne réponse!</sub>
+      </clue>
+      <clue>
+        <sub>Tu aimes les pornos?</sub>
+        <sub>Les pornos?</sub>
+        <sub>Ça te fait bander?</sub>
+        <sub>Non, merci.</sub>
+        <sub>Comme tu veux, champion.</sub>
+        <sub>Eh bien... à demain.</sub>
+      </clue>
+      <clue>
+        <sub>Je ne peux pas te voir, ce soir.</sub>
+        <sub>Je dois sortir avec M. Eddy.</sub>
+        <sub>Très bien.</sub>
+      </clue>
+      <clue>
+        <sub>La police nous a appelés.</sub>
+        <sub>Qu'est-ce qu'ils voulaient?</sub>
+        <sub>Ils voulaient savoir si on avait pu...</sub>
+        <sub>trouver ce qui t'est arrivé l'autre nuit.</sub>
+        <sub>Et aussi si tu te rappelles...</sub>
+        <sub>quoi que ce soit.</sub>
+        <sub>Je ne me rappelle rien.</sub>
+      </clue>
+      <clue>
+        <sub>Tu te souviens de cette fille?</sub>
+        <sub>La jolie blonde dans la voiture.</sub>
+        <sub>Elle s'appelle Alice.</sub>
+        <sub>J'aime cette fille à en mourir.</sub>
+        <sub>Si je découvrais...</sub>
+        <sub>que quelqu'un se la fait...</sub>
+        <sub>je lui mettrais ça dans le cul...</sub>
+        <sub>jusqu'à la bouche.</sub>
+        <sub>Ensuite, tu sais quoi?</sub>
+        <sub>Quoi?</sub>
+        <sub>Je lui ferais sauter la cervelle.</sub>
+      </clue>
+      <clue>
+        <sub>Retrouve-moi à l'hôtel Starlight...</sub>
+        <sub>sur Sycamore...</sub>
+        <sub>dans vingt minutes.</sub>
+        <sub>Il va nous tuer.</sub>
+        <sub>Es-tu...certaine qu'il sait?</sub>
+        <sub>Je ne suis pas certaine, mais il sait.</sub>
+      </clue>
+      <clue>
+        <sub>Je serai en haut avec Andy.</sub>
+        <sub>La porte du fond sera ouverte.</sub>
+        <sub>Traverse la cuisine jusqu'au séjour.</sub>
+        <sub>Il y a un bar.</sub>
+        <sub>A 1 1 h 15, j'enverrai Andy...</sub>
+        <sub>me préparer un verre.</sub>
+        <sub>Et à ce moment-là, ...</sub>
+        <sub>tu lui éclates la tête.</sub>
+      </clue>
+      <clue>
+        <sub>Elle s'appelle Renée.</sub>
+        <sub>Si elle t'a dit Alice, elle t'a menti.</sub>
+        <sub>Et ton nom?</sub>
+        <sub>C'est quoi, ton putain de nom?</sub>
+        <sub>Tu viens avec moi.</sub>
+      </clue>
+      <clue>
+        <sub>Regarde-moi ça.</sub>
+        <sub>C'est bien elle.</sub>
+        <sub>La femme de Fred Madison, ...</sub>
+        <sub>avec Dick Laurent.</sub>
+        <sub>Et M. Tête-Fendue.</sub>
+        <sub>On a plein d'empreintes de Pete Dayton.</sub>
+        <sub>Tu sais ce que je pense, Ed?</sub>
+        <sub>Quoi, Al? Que penses-tu?</sub>
+        <sub>Je crois pas aux coïncidences...</sub>
+        <sub>malheureuses.</sub>
+      </clue>
+      <clue>
+        <sub>Dick Laurent est mort.</sub>
+        <sub>Tu veux bien que j'aille pas au club, ...</sub>
+        <sub>ce soir?</sub>
+        <sub>Qu'est-ce que tu vas faire?</sub>
+        <sub>Rester à la maison.</sub>
+        <sub>Lire.</sub>
+        <sub>Lire?</sub>
+      </clue>
+      <clue>
+        <sub>Le chien m'a réveillée.</sub>
+        <sub>Mais à qui il est, ce chien?</sub>
+        <sub>Qu'est-ce que c'est?</sub>
+        <sub>Une autre vidéo?</sub>
+        <sub>Oui.</sub>
+      </clue>
+      <clue>
+        <sub>Voyons le couloir et la chambre.</sub>
+        <sub>C'est la chambre?</sub>
+        <sub>Vous dormez dans cette pièce?</sub>
+        <sub>Tous les deux?</sub>
+        <sub>C'est notre chambre.</sub>
+        <sub>Il n'y en a pas d'autre?</sub>
+      </clue>
+    </clues>
+  </level>
+  <level path="level_3_bmp" duration="110" distance="1200">
+    <clues>
+      <clue>
+        <sub>Prenez l'autobus d'Indianapolis</sub>
+        <sub>qui quitte Chicago à 14h.</sub>
+        <sub>Descendez à Prairie Stop, route 41.</sub>
+        <sub>C'est à 1h30 de Chicago.</sub>
+      </clue>
+      <clue>
+        <sub>Vous êtes attendu à l'Ambassador,</sub>
+        <sub>à Chicago.</sub>
+        <sub>Et ensuite au Sheraton, à Rapid City,</sub>
+        <sub>dans le Dakota du Sud.</sub>
+        <sub>Ce n'est pas moi !</sub>
+        <sub>Inutile d'imaginer...</sub>
+        <sub>que vous pouvez nous tromper.</sub>
+      </clue>
+      <clue>
+        <sub>Je vais louer une voiture.</sub>
+        <sub>Non, M. Kaplan exige l'autobus</sub>
+        <sub>pour être sûr que vous êtes seul.</sub>
+        <sub>Et une fois là-bas ?</sub>
+        <sub>Attendez sur la route.</sub>
+        <sub>Il sera là à 15h30.</sub>
+        <sub>Comment le reconnaître ?</sub>
+        <sub>Il vous reconnaîtra.</sub>
+      </clue>
+      <clue>
+        <sub>Qu'y a-t-il ?</sub>
+        <sub>Pourquoi ?</sub>
+        <sub>Je ne sais pas, vous semblez tendue.</sub>
+        <sub>Filez, la police est à vos trousses.</sub>
+        <sub>Nous nous reverrons ?</sub>
+        <sub>Un de ces jours, sûrement.</sub>
+      </clue>
+      <clue>
+       <sub>Il fait chaud.</sub>
+       <sub>On a vu pire.</sub>
+       <sub>Vous attendez quelqu'un ?</sub>
+       <sub>L'autobus. Il a du retard.</sub>
+       <sub>Certains de ces pilotes deviennent riches</sub>
+       <sub>s'ils vivent assez longtemps.</sub>
+      </clue>
+      <clue>
+        <sub>Je suis un publiciste, non un leurre !</sub>
+        <sub>Je subviens aux besoins de ma mère,</sub>
+        <sub>j'ai deux ex-épouses et plusieurs barmen !</sub>
+        <sub>Je les décevrais beaucoup</sub>
+        <sub>en me faisant tuer !</sub>
+      </clue>
+      <clue>
+        <sub>Si nous faisions connaissance ?</sub>
+        <sub>Eve Kendall. Vingt-six ans, célibataire.</sub>
+        <sub>Vous savez tout.</sub>
+        <sub>- Que faites-vous</sub>
+        <sub>à part jouer les Circé ?</sub>
+        <sub>- Du dessin industriel.</sub>
+      </clue>
+      <clue>
+        <sub>J'étais libre ce week-end là, alors...</sub>
+        <sub>j'ai décidé de tomber amoureuse.</sub>
+        <sub>Charmant.</sub>
+      </clue>
+    </clues>
+  </level>
+</levels>

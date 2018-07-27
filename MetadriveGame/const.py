@@ -21,7 +21,7 @@ SCREEN_WIDTH_DEFAULT = 1080
 SUBTITLE_FILE = './levels_fr.xml'
 
 # Controls
-TEST_DANCEPAD = False
+TEST_DANCEPAD = True
 
 # Defaults keys binding
 UP_ARROW = 2
