@@ -3,7 +3,7 @@ chardet==3.0.4
 idna==2.6
 kwconfig==1.1.7
 lxml==4.1.1
-numpy==1.14.2
+numpy==1.22.0
 opencv-python==3.4.0.12
 requests==2.18.4
 selenium==3.12.0
